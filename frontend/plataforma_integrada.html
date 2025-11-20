@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Integrada - Gemelo Digital</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #25D366;
+            --primary-turquoise: #128C7E;
+            --dark-turquoise: #075E54;
+            --light-bg: #ECE5DD;
+            --white: #FFFFFF;
+            --text-dark: #303030;
+            --gold: #FFD700;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-turquoise) 0%, var(--dark-turquoise) 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* ============ WHATSAPP CHAT VIEW ============ */
+        .chat-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: var(--primary-turquoise);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+
+        .chat-info h3 {
+            margin-bottom: 5px;
+        }
+
+        .chat-status {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .messages-area {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--light-bg);
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            line-height: 1.4;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            border-bottom-left-radius: 0;
+        }
+
+        .message.user .message-bubble {
+            background: #DCF8C6;
+            border-bottom-right-radius: 0;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            width: 60px;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            background: #f0f0f0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1em;
+        }
+
+        .send-button {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .reference {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-turquoise));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        }
+
+        /* ============ ROLE SELECTION ============ */
+        .role-selection {
+            max-width: 800px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .role-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .role-card {
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-card:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .role-card.selected {
+            border-color: var(--primary-green);
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.1), rgba(18, 140, 126, 0.1));
+        }
+
+        .role-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        /* ============ CONSENT SCREEN ============ */
+        .consent-screen {
+            background: white;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .consent-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .consent-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        /* ============ FAMILY DASHBOARD ============ */
+        .family-dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .family-header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .patients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .patient-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .patient-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .patient-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-turquoise));
+        }
+
+        .patient-avatar-large {
+            font-size: 5em;
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .health-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        /* ============ TAMAGOTCHI DETAIL ============ */
+        .tamagotchi-detail {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tamagotchi-main {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .big-avatar {
+            font-size: 10em;
+            animation: float 3s ease-in-out infinite;
+            text-align: center;
+        }
+
+        .programs-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .program-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary-turquoise);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .program-card.assigned {
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.1), rgba(18, 140, 126, 0.05));
+            border-left-color: var(--primary-green);
+        }
+
+        .program-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .program-name {
+            font-weight: bold;
+            color: var(--text-dark);
+            font-size: 1.1em;
+        }
+
+        .assign-button {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .assign-button:hover {
+            background: var(--primary-turquoise);
+        }
+
+        .assign-button.assigned {
+            background: #28a745;
+        }
+
+        /* ============ ENROLLMENT MODAL ============ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-turquoise);
+            margin-bottom: 10px;
+        }
+
+        .modal-section {
+            margin: 25px 0;
+        }
+
+        .modal-section label {
+            display: block;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .modal-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-select:focus {
+            outline: none;
+            border-color: var(--primary-turquoise);
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary-turquoise);
+            background: rgba(18, 140, 126, 0.1);
+        }
+
+        .time-slot.selected {
+            border-color: var(--primary-green);
+            background: rgba(37, 211, 102, 0.2);
+            font-weight: bold;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-button.confirm {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .modal-button.confirm:hover {
+            background: var(--primary-turquoise);
+        }
+
+        .modal-button.cancel {
+            background: #e0e0e0;
+            color: var(--text-dark);
+        }
+
+        .modal-button.cancel:hover {
+            background: #ccc;
+        }
+
+        .enrollment-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid var(--primary-turquoise);
+        }
+
+        .enrollment-summary h4 {
+            margin-bottom: 15px;
+            color: var(--primary-turquoise);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .role-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .tamagotchi-main {
+                grid-template-columns: 1fr;
+            }
+
+            .patients-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- VIEW 1: WHATSAPP CHAT -->
+        <div id="chat-view" class="view active">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-avatar" id="chatAvatar">👤</div>
+                    <div class="chat-info">
+                        <h3 id="chatTitle">Conectando...</h3>
+                        <div class="chat-status">Tu yo del futuro quiere hablar contigo</div>
+                    </div>
+                </div>
+
+                <div class="messages-area" id="messagesArea">
+                    <div class="typing-indicator" id="typingIndicator">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="messageInput" placeholder="Escribe tu mensaje...">
+                    <button class="send-button" id="sendButton">Enviar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: ROLE SELECTION -->
+        <div id="role-view" class="view">
+            <div class="role-selection">
+                <h1 style="text-align: center; color: var(--primary-turquoise); margin-bottom: 10px;">
+                    👨‍👩‍👧‍👦 ¡Bienvenido a tu Plataforma de Salud!
+                </h1>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                    Selecciona cómo quieres gestionar tu salud
+                </p>
+
+                <div class="role-cards">
+                    <div class="role-card" onclick="selectRole('individual')">
+                        <div class="role-icon">🧑</div>
+                        <h3>Gestión Individual</h3>
+                        <p style="color: #666; margin-top: 10px;">
+                            Solo quiero gestionar mi propia salud
+                        </p>
+                    </div>
+
+                    <div class="role-card" onclick="selectRole('family')">
+                        <div class="role-icon">👨‍👩‍👧‍👦</div>
+                        <h3>Gestor Familiar</h3>
+                        <p style="color: #666; margin-top: 10px;">
+                            Quiero gestionar la salud de toda mi familia (niños, adultos, ancianos)
+                        </p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="cta-button" id="roleButton" style="display: none;" onclick="confirmRole()">
+                        Continuar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: CONSENT (only for family role) -->
+        <div id="consent-view" class="view">
+            <div class="consent-screen">
+                <h1 style="text-align: center; color: var(--primary-turquoise); margin-bottom: 20px;">
+                    🔐 Autorización de Datos Sensibles
+                </h1>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                    Como gestor familiar, necesitas autorización para gestionar datos de salud
+                </p>
+
+                <div class="consent-item">
+                    <input type="checkbox" id="consent1">
+                    <label for="consent1">
+                        <strong>Autorización legal:</strong> Tengo autorización para gestionar datos de salud de menores de edad y/o adultos mayores a mi cargo.
+                    </label>
+                </div>
+
+                <div class="consent-item">
+                    <input type="checkbox" id="consent2">
+                    <label for="consent2">
+                        <strong>Confidencialidad:</strong> Me comprometo a mantener la confidencialidad de la información de salud.
+                    </label>
+                </div>
+
+                <div class="consent-item">
+                    <input type="checkbox" id="consent3">
+                    <label for="consent3">
+                        <strong>Términos de uso:</strong> Acepto los términos (HIPAA, GDPR, Ley 1581 de 2012 Colombia).
+                    </label>
+                </div>
+
+                <button class="cta-button" id="consentButton" disabled onclick="acceptConsent()" style="width: 100%; margin-top: 20px;">
+                    Continuar
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 4: FAMILY DASHBOARD -->
+        <div id="family-view" class="view">
+            <div class="family-dashboard">
+                <div class="family-header">
+                    <div>
+                        <h1>👨‍👩‍👧‍👦 Mi Familia Saludable</h1>
+                        <p style="color: #666; margin-top: 5px;">Gestiona la salud de todos los miembros</p>
+                    </div>
+                    <button class="cta-button" onclick="addPatient()">+ Agregar Miembro</button>
+                </div>
+
+                <div class="patients-grid" id="patientsGrid"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: TAMAGOTCHI DETAIL WITH PROGRAMS -->
+        <div id="tamagotchi-view" class="view">
+            <div class="tamagotchi-detail">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <button class="back-button" onclick="backToFamily()">← Volver</button>
+                    <div>
+                        <span style="background: var(--gold); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold;">
+                            ⭐ <span id="points">0</span> puntos
+                        </span>
+                        <span style="background: var(--primary-turquoise); color: white; padding: 10px 15px; border-radius: 20px; font-weight: bold; margin-left: 10px;">
+                            Nivel <span id="level">1</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="tamagotchi-main">
+                    <div style="background: linear-gradient(135deg, #f5f7fa, #c3cfe2); padding: 40px; border-radius: 20px; text-align: center;">
+                        <div class="big-avatar" id="detailAvatar">👤</div>
+                        <h2 id="patientName">Paciente</h2>
+                        <p id="patientInfo" style="color: #666; margin-top: 10px;">Info</p>
+                        <div style="font-size: 3em; margin-top: 20px;" id="mood">😊</div>
+                    </div>
+
+                    <div>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary-turquoise);">
+                            <div style="font-weight: bold; color: #666; margin-bottom: 10px;">💪 Salud General</div>
+                            <div class="health-bar">
+                                <div class="health-fill" id="healthBar" style="width: 100%; background: #1dd1a1;"></div>
+                            </div>
+                            <div style="text-align: center; font-size: 2em; color: var(--primary-turquoise); font-weight: bold;" id="healthPercent">100%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="programs-section">
+                    <h3 style="margin-bottom: 20px;">📋 Programas de Salud Recomendados</h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Basados en edad, comorbilidades y perfil de salud
+                    </p>
+                    <div id="programsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENROLLMENT MODAL -->
+    <div class="modal-overlay" id="enrollmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalProgramName">Inscripción al Programa</h2>
+                <p style="color: #666;">Selecciona tu ciudad, clínica y horario preferido</p>
+            </div>
+
+            <div class="modal-section">
+                <label>📍 Ciudad</label>
+                <select class="modal-select" id="citySelect" onchange="updateClinics()">
+                    <option value="">Seleccione una ciudad</option>
+                    <option value="bogota">Bogotá</option>
+                    <option value="medellin">Medellín</option>
+                    <option value="cali">Cali</option>
+                    <option value="barranquilla">Barranquilla</option>
+                    <option value="cartagena">Cartagena</option>
+                </select>
+            </div>
+
+            <div class="modal-section">
+                <label>🏥 Clínica Colsanitas</label>
+                <select class="modal-select" id="clinicSelect">
+                    <option value="">Primero seleccione una ciudad</option>
+                </select>
+            </div>
+
+            <div class="modal-section">
+                <label>🕐 Horario de Preferencia</label>
+                <div class="time-slots" id="timeSlots"></div>
+            </div>
+
+            <div class="enrollment-summary" id="enrollmentSummary" style="display: none;">
+                <h4>📋 Resumen de Inscripción</h4>
+                <div class="summary-item">
+                    <span>Programa:</span>
+                    <strong id="summaryProgram">-</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Ciudad:</span>
+                    <strong id="summaryCity">-</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Clínica:</span>
+                    <strong id="summaryClinic">-</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Horario:</span>
+                    <strong id="summaryTime">-</strong>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="modal-button cancel" onclick="closeEnrollmentModal()">Cancelar</button>
+                <button class="modal-button confirm" id="confirmEnrollBtn" disabled onclick="confirmEnrollment()">Confirmar Inscripción</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace with your own OpenAI API key
+        // Get your key at: https://platform.openai.com/api-keys
+        const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
+
+        // Colsanitas clinics by city
+        const COLSANITAS_CLINICS = {
+            bogota: [
+                "Clínica Reina Sofía",
+                "Clínica Universitaria Colombia",
+                "Clínica La Colina",
+                "Centro Médico Colsanitas El Polo",
+                "Centro Médico Colsanitas Suba",
+                "Clínica Infantil Colsubsidio"
+            ],
+            medellin: [
+                "Clínica Colsanitas Medellín",
+                "Centro Médico Colsanitas Laureles",
+                "Centro Médico Colsanitas El Poblado",
+                "Clínica Las Américas"
+            ],
+            cali: [
+                "Clínica Colsanitas Torre de Cali",
+                "Centro Médico Colsanitas Norte",
+                "Centro Médico Colsanitas Sur"
+            ],
+            barranquilla: [
+                "Clínica Colsanitas Barranquilla",
+                "Centro Médico Colsanitas Norte",
+                "Centro Médico Colsanitas Riomar"
+            ],
+            cartagena: [
+                "Clínica Colsanitas Cartagena",
+                "Centro Médico Colsanitas Bocagrande"
+            ]
+        };
+
+        const TIME_SLOTS = [
+            "7:00 AM - 9:00 AM",
+            "9:00 AM - 11:00 AM",
+            "11:00 AM - 1:00 PM",
+            "2:00 PM - 4:00 PM",
+            "4:00 PM - 6:00 PM",
+            "6:00 PM - 8:00 PM"
+        ];
+
+        let pendingEnrollment = {
+            programCode: null,
+            programName: null,
+            city: null,
+            clinic: null,
+            time: null
+        };
+
+        // Program-specific tasks
+        const PROGRAM_TASKS = {
+            HYPERTENSION: [
+                { id: 'htn_1', text: 'Registrar toma de presión arterial', category: 'monitoring' },
+                { id: 'htn_2', text: 'Confirmar adherencia a medicamentos', category: 'medication' },
+                { id: 'htn_3', text: 'Agendar control cardiología', category: 'appointment' }
+            ],
+            DIABETES: [
+                { id: 'db_1', text: 'Registrar glucometría diaria', category: 'monitoring' },
+                { id: 'db_2', text: 'Cargar resultados de HbA1c', category: 'labs' },
+                { id: 'db_3', text: 'Verificar función renal', category: 'labs' },
+                { id: 'db_4', text: 'Agendar nutrición', category: 'appointment' }
+            ],
+            OBESITY: [
+                { id: 'ob_1', text: 'Validar ingreso a Bodytech', category: 'activity' },
+                { id: 'ob_2', text: 'Agendar nutrición', category: 'appointment' },
+                { id: 'ob_3', text: 'Consulta con deportólogo', category: 'appointment' },
+                { id: 'ob_4', text: 'Registrar peso semanal', category: 'monitoring' }
+            ],
+            CARDIOVASCULAR: [
+                { id: 'cv_1', text: 'Agendar cita titulación de fármacos', category: 'appointment' },
+                { id: 'cv_2', text: 'Educación en autocuidado', category: 'education' },
+                { id: 'cv_3', text: 'Control de presión arterial', category: 'monitoring' }
+            ],
+            PRENATAL: [
+                { id: 'pn_1', text: 'Agendar control prenatal', category: 'appointment' },
+                { id: 'pn_2', text: 'Agendar odontología', category: 'appointment' },
+                { id: 'pn_3', text: 'Asistir curso preparación maternidad', category: 'education' },
+                { id: 'pn_4', text: 'Programar visita prenatal con pediatra (Semana 32)', category: 'appointment' }
+            ],
+            PEDIATRIC: [
+                { id: 'pd_1', text: 'Vacunación al día', category: 'prevention' },
+                { id: 'pd_2', text: 'Control de crecimiento y desarrollo', category: 'monitoring' },
+                { id: 'pd_3', text: 'Inscribir actividades lúdicas (Recre4)', category: 'activity' }
+            ],
+            GERIATRIC: [
+                { id: 'gr_1', text: 'Agendar valoración geriátrica integral', category: 'appointment' },
+                { id: 'gr_2', text: 'Programar rehabilitación física', category: 'appointment' },
+                { id: 'gr_3', text: 'Confirmar visita médica domiciliaria', category: 'home_visit' },
+                { id: 'gr_4', text: 'Taller de estimulación cognitiva', category: 'education' }
+            ]
+        };
+
+        // Universal healthy habits (for ALL patients)
+        const UNIVERSAL_HABITS = [
+            { id: 'uh_1', text: 'No consumo de tabaco', icon: '🚭', category: 'prevention' },
+            { id: 'uh_2', text: 'Consumo responsable de alcohol (0 o moderado)', icon: '🍷', category: 'prevention' },
+            { id: 'uh_3', text: 'Prevención de burnout: descanso mental', icon: '🧘', category: 'mental_health' },
+            { id: 'uh_4', text: 'Actividad física regular (150 min/semana)', icon: '🏃', category: 'activity' },
+            { id: 'uh_5', text: 'Alimentación balanceada (5 porciones frutas/verduras)', icon: '🥗', category: 'nutrition' },
+            { id: 'uh_6', text: 'Hidratación adecuada (8 vasos agua/día)', icon: '💧', category: 'hydration' },
+            { id: 'uh_7', text: 'Sueño reparador (7-8 horas)', icon: '😴', category: 'sleep' },
+            { id: 'uh_8', text: 'Bienestar emocional: conexión social', icon: '❤️', category: 'mental_health' }
+        ];
+
+        // Health programs database
+        const HEALTH_PROGRAMS = [
+            {
+                code: "HYPERTENSION",
+                name: "Programa de Hipertensión",
+                description: "Control y seguimiento de presión arterial",
+                targetConditions: ["hipertension", "pre_hipertension"],
+                ageRange: [30, 100],
+                expectedReduction: "30-40% reducción en complicaciones cardiovasculares",
+                city: "Bogotá",
+                center: "Centro Cardiovascular Shaio"
+            },
+            {
+                code: "DIABETES",
+                name: "Programa de Diabetes",
+                description: "Control integral de diabetes tipo 1 y 2",
+                targetConditions: ["diabetes", "pre_diabetes"],
+                ageRange: [18, 100],
+                expectedReduction: "35-45% reducción en complicaciones diabéticas",
+                city: "Medellín",
+                center: "Hospital Pablo Tobón Uribe"
+            },
+            {
+                code: "OBESITY",
+                name: "Programa de Obesidad y Nutrición",
+                description: "Apoyo integral para manejo de peso",
+                targetConditions: ["obesidad", "sobrepeso"],
+                ageRange: [12, 100],
+                expectedReduction: "25-35% reducción en riesgo metabólico",
+                city: "Cali",
+                center: "Fundación Valle del Lili"
+            },
+            {
+                code: "CARDIOVASCULAR",
+                name: "Programa Cardiovascular",
+                description: "Prevención y manejo de enfermedades cardiovasculares",
+                targetConditions: ["enfermedad_cardiaca", "colesterol_alto"],
+                ageRange: [35, 100],
+                expectedReduction: "30-40% reducción en eventos cardiovasculares",
+                city: "Bogotá",
+                center: "Fundación Cardioinfantil"
+            },
+            {
+                code: "PRENATAL",
+                name: "Programa Prenatal",
+                description: "Seguimiento y cuidado durante el embarazo",
+                targetConditions: ["embarazo", "embarazo_alto_riesgo"],
+                ageRange: [18, 45],
+                expectedReduction: "40-50% reducción en complicaciones del embarazo",
+                city: "Barranquilla",
+                center: "Clínica Portoazul"
+            },
+            {
+                code: "PEDIATRIC",
+                name: "Programa Pediátrico Preventivo",
+                description: "Prevención y desarrollo saludable infantil",
+                targetConditions: ["ninguna"],
+                ageRange: [0, 17],
+                expectedReduction: "Desarrollo óptimo y prevención de enfermedades",
+                city: "Bogotá",
+                center: "Hospital de la Misericordia"
+            },
+            {
+                code: "GERIATRIC",
+                name: "Programa Geriátrico Integral",
+                description: "Cuidado integral para adultos mayores",
+                targetConditions: ["multiple"],
+                ageRange: [65, 100],
+                expectedReduction: "Mejora en calidad de vida y autonomía",
+                city: "Medellín",
+                center: "Centro Geriátrico San Vicente"
+            }
+        ];
+
+        // Sample patients (family members)
+        let familyMembers = [
+            {
+                id: 1,
+                name: 'María González',
+                relation: 'Yo (Titular)',
+                age: 45,
+                avatar: '👩',
+                city: 'Bogotá',
+                conditions: ['Hipertensión', 'Diabetes Tipo 2', 'Obesidad'],
+                healthScore: 65,
+                points: 850,
+                level: 3,
+                gfr: 55,
+                cardiovascularRisk: 35,
+                assignedPrograms: [],
+                completedTasks: [], // IDs of completed tasks
+                completedHabits: ['uh_6', 'uh_7'], // Some habits already done
+                goals: [
+                    { id: 'g1', text: 'Reducir presión arterial a 120/80', progress: 30, target: 100 },
+                    { id: 'g2', text: 'HbA1c < 7%', progress: 45, target: 100 },
+                    { id: 'g3', text: 'Perder 5 kg', progress: 20, target: 100 }
+                ]
+            },
+            {
+                id: 2,
+                name: 'Carlos González',
+                relation: 'Esposo',
+                age: 48,
+                avatar: '👨',
+                city: 'Bogotá',
+                conditions: ['Colesterol Alto'],
+                healthScore: 80,
+                points: 1240,
+                level: 4,
+                gfr: 90,
+                cardiovascularRisk: 20,
+                assignedPrograms: [],
+                completedTasks: [],
+                completedHabits: ['uh_1', 'uh_2', 'uh_4', 'uh_6'],
+                goals: [
+                    { id: 'g1', text: 'Colesterol LDL < 100 mg/dL', progress: 55, target: 100 },
+                    { id: 'g2', text: 'Correr 5K sin parar', progress: 70, target: 100 }
+                ]
+            },
+            {
+                id: 3,
+                name: 'Sofía González',
+                relation: 'Hija',
+                age: 12,
+                avatar: '👧',
+                city: 'Bogotá',
+                conditions: [],
+                healthScore: 95,
+                points: 1850,
+                level: 5,
+                gfr: 110,
+                cardiovascularRisk: 5,
+                assignedPrograms: [],
+                completedTasks: [],
+                completedHabits: ['uh_1', 'uh_2', 'uh_4', 'uh_5', 'uh_6', 'uh_7', 'uh_8'],
+                goals: [
+                    { id: 'g1', text: 'Actividad física 5 días/semana', progress: 86, target: 100 },
+                    { id: 'g2', text: 'Vacunación completa', progress: 100, target: 100 }
+                ]
+            },
+            {
+                id: 4,
+                name: 'Abuela Rosa',
+                relation: 'Madre (Anciana)',
+                age: 78,
+                avatar: '👵',
+                city: 'Bogotá',
+                conditions: ['Hipertensión', 'Artritis'],
+                healthScore: 70,
+                points: 620,
+                level: 2,
+                gfr: 50,
+                cardiovascularRisk: 40,
+                assignedPrograms: [],
+                completedTasks: [],
+                completedHabits: ['uh_1', 'uh_2', 'uh_6'],
+                goals: [
+                    { id: 'g1', text: 'Adherencia medicación 100%', progress: 93, target: 100 },
+                    { id: 'g2', text: 'Caminar 15 min diarios', progress: 80, target: 100 }
+                ]
+            }
+        ];
+
+        let selectedPatient = null;
+        let selectedRole = null;
+        let conversationHistory = [];
+        let messageCount = 0;
+        let initialMessagesSent = false;
+        let currentPatientDetail = null;
+
+        // Initialize
+        window.onload = function() {
+            // Auto-select first patient for chat demo
+            selectedPatient = familyMembers[0];
+            document.getElementById('chatAvatar').textContent = selectedPatient.avatar;
+            document.getElementById('chatTitle').textContent = `Conversación con ${selectedPatient.name}`;
+            startPersonalizedChat();
+        };
+
+        // Chat functions
+        async function startPersonalizedChat() {
+            if (initialMessagesSent) return;
+            initialMessagesSent = true;
+
+            const p = selectedPatient;
+
+            await addMessageWithDelay('assistant',
+                `Hola ${p.name}, soy TÚ pero del futuro. Tengo ${p.age + 15} años ahora, y necesito hablar contigo sobre algo MUY importante. ¿Tienes 5 minutos?`
+            , 500);
+
+            await addMessageWithDelay('assistant',
+                `Mira, sé que tienes ${p.age} años y vives en ${p.city}. ${p.conditions.length > 0 ? `Ya tienes ${p.conditions.join(', ')}.` : 'Estás saludable ahora.'} Pero si no actúas AHORA, todo empeora.`
+            , 2500);
+
+            await addMessageWithDelay('assistant',
+                `Déjame mostrarte algo que te va a impactar:`
+            , 4500);
+
+            setTimeout(() => addHealthChart(), 6000);
+
+            await addMessageWithDelay('assistant',
+                `Tu TFG (filtración glomerular) es ${p.gfr} ml/min/1.73m². ${p.gfr < 60 ? 'Esto indica daño renal temprano.' : 'Está bien, pero podemos mantenerla así.'}`
+            , 8000);
+
+            await addMessageWithDelay('assistant',
+                `${p.name}, ¿qué te preocupa más de tu salud en este momento?`
+            , 10000);
+        }
+
+        async function addMessageWithDelay(role, text, delay) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    addMessage(role, text);
+                    resolve();
+                }, delay);
+            });
+        }
+
+        function addMessage(role, text) {
+            const messagesArea = document.getElementById('messagesArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = text;
+            messageDiv.appendChild(bubble);
+            messagesArea.appendChild(messageDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function addHealthChart() {
+            const messagesArea = document.getElementById('messagesArea');
+            const chartDiv = document.createElement('div');
+            chartDiv.className = 'chart-container';
+            const canvas = document.createElement('canvas');
+            chartDiv.appendChild(canvas);
+            messagesArea.appendChild(chartDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: ['Tú Ahora', 'En 5 años\n(sin programa)', 'En 5 años\n(con programa)'],
+                    datasets: [{
+                        label: 'Riesgo Cardiovascular (%)',
+                        data: [selectedPatient.cardiovascularRisk, selectedPatient.cardiovascularRisk + 15, selectedPatient.cardiovascularRisk - 10],
+                        backgroundColor: ['#ffc107', '#ff6b6b', '#28a745']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'Proyección de Riesgo Cardiovascular' },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 60 }
+                    }
+                }
+            });
+        }
+
+        // Send message handler
+        document.getElementById('sendButton').onclick = sendMessage;
+        document.getElementById('messageInput').onkeypress = function(e) {
+            if (e.key === 'Enter') sendMessage();
+        };
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('user', message);
+            input.value = '';
+            messageCount++;
+
+            document.getElementById('typingIndicator').classList.add('show');
+
+            try {
+                const response = await callOpenAI(message);
+                document.getElementById('typingIndicator').classList.remove('show');
+                addMessage('assistant', response);
+
+                const acceptanceKeywords = ['sí', 'si', 'acepto', 'ok', 'quiero', 'me interesa', 'inscribirme'];
+                const isAccepting = acceptanceKeywords.some(keyword => message.toLowerCase().includes(keyword));
+
+                if (messageCount >= 3 || isAccepting) {
+                    setTimeout(() => {
+                        addMessage('assistant', `${selectedPatient.name}, creo que ya tienes una idea clara. ¿Te gustaría inscribirte en programas de salud personalizados?`);
+                        setTimeout(() => showTransitionButton(), 2000);
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('OpenAI Error:', error);
+                document.getElementById('typingIndicator').classList.remove('show');
+                addMessage('assistant', 'Lo siento, tuve un problema técnico. Pero déjame decirte: tu salud es demasiado valiosa para arriesgarla.');
+            }
+        }
+
+        async function callOpenAI(userMessage) {
+            const p = selectedPatient;
+            const toneGuidance = p.cardiovascularRisk >= 30 ? 'Sé MUY dramático y urgente.' : 'Sé preventivo pero motivador.';
+
+            const systemPrompt = `Eres el "yo del futuro" de ${p.name}, de ${p.age} años de ${p.city}.
+
+DATOS MÉDICOS:
+- Condiciones: ${p.conditions.join(', ') || 'Ninguna'}
+- TFG: ${p.gfr} ml/min/1.73m²
+- Riesgo cardiovascular: ${p.cardiovascularRisk}%
+
+${toneGuidance}
+Maneja objeciones con empatía y datos.
+Máximo 2-3 oraciones.`;
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...conversationHistory,
+                { role: 'user', content: userMessage }
+            ];
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4',
+                    messages: messages,
+                    temperature: 0.85,
+                    max_tokens: 120
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+
+            const reply = data.choices[0].message.content;
+            conversationHistory.push({ role: 'user', content: userMessage });
+            conversationHistory.push({ role: 'assistant', content: reply });
+
+            return reply;
+        }
+
+        function showTransitionButton() {
+            if (document.querySelector('.transition-button-container')) return;
+
+            const messagesArea = document.getElementById('messagesArea');
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'transition-button-container';
+            buttonDiv.style.textAlign = 'center';
+            buttonDiv.style.padding = '20px';
+            buttonDiv.innerHTML = `
+                <button class="cta-button" onclick="goToRoleSelection()">
+                    🧬 Sí, quiero inscribirme en programas de salud
+                </button>
+            `;
+            messagesArea.appendChild(buttonDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // Role selection
+        function goToRoleSelection() {
+            showView('role');
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
+            event.target.closest('.role-card').classList.add('selected');
+            document.getElementById('roleButton').style.display = 'inline-block';
+        }
+
+        function confirmRole() {
+            if (selectedRole === 'family') {
+                showView('consent');
+                setupConsentListeners();
+            } else {
+                // Individual role goes directly to single patient view
+                currentPatientDetail = selectedPatient;
+                showView('tamagotchi');
+                renderTamagotchiDetail();
+            }
+        }
+
+        // Consent
+        function setupConsentListeners() {
+            document.querySelectorAll('#consent-view input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', checkConsent);
+            });
+        }
+
+        function checkConsent() {
+            const consent1 = document.getElementById('consent1').checked;
+            const consent2 = document.getElementById('consent2').checked;
+            const consent3 = document.getElementById('consent3').checked;
+            document.getElementById('consentButton').disabled = !(consent1 && consent2 && consent3);
+        }
+
+        function acceptConsent() {
+            showView('family');
+            renderFamilyDashboard();
+        }
+
+        // Family dashboard
+        function renderFamilyDashboard() {
+            const grid = document.getElementById('patientsGrid');
+            grid.innerHTML = familyMembers.map(member => {
+                const healthColor = member.healthScore >= 80 ? '#1dd1a1' : member.healthScore >= 60 ? '#feca57' : '#ff6b6b';
+
+                return `
+                    <div class="patient-card" onclick="openPatientDetail(${member.id})">
+                        <div class="patient-avatar-large">${member.avatar}</div>
+                        <h3 style="text-align: center; margin: 15px 0 5px 0;">${member.name}</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 15px;">${member.relation} • ${member.age} años</p>
+
+                        <div class="health-bar">
+                            <div class="health-fill" style="width: ${member.healthScore}%; background: ${healthColor};"></div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 10px;">
+                            <span style="background: var(--gold); color: white; padding: 5px 12px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">
+                                ⭐ ${member.points} pts
+                            </span>
+                        </div>
+
+                        <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                            ${member.conditions.length > 0 ? member.conditions.slice(0, 2).join(', ') : 'Sin condiciones'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openPatientDetail(memberId) {
+            currentPatientDetail = familyMembers.find(m => m.id === memberId);
+            showView('tamagotchi');
+            renderTamagotchiDetail();
+        }
+
+        function renderTamagotchiDetail() {
+            const p = currentPatientDetail;
+
+            document.getElementById('detailAvatar').textContent = p.avatar;
+            document.getElementById('patientName').textContent = p.name;
+            document.getElementById('patientInfo').textContent = `${p.relation} • ${p.age} años • ${p.city}`;
+            document.getElementById('points').textContent = p.points;
+            document.getElementById('level').textContent = p.level;
+            document.getElementById('healthPercent').textContent = `${p.healthScore}%`;
+            document.getElementById('healthBar').style.width = `${p.healthScore}%`;
+
+            const mood = p.healthScore >= 80 ? '😊' : p.healthScore >= 60 ? '😐' : '😟';
+            document.getElementById('mood').textContent = mood;
+
+            // Render recommended programs
+            renderPrograms();
+            // Render universal habits
+            renderUniversalHabits();
+            // Render goals
+            renderGoals();
+        }
+
+        function renderPrograms() {
+            const p = currentPatientDetail;
+            const container = document.getElementById('programsContainer');
+
+            // Filter programs based on age and conditions
+            const recommendedPrograms = HEALTH_PROGRAMS.filter(program => {
+                const ageMatch = p.age >= program.ageRange[0] && p.age <= program.ageRange[1];
+                const conditionMatch = program.targetConditions.some(tc =>
+                    tc === 'ninguna' || tc === 'multiple' ||
+                    p.conditions.some(pc => pc.toLowerCase().includes(tc.replace('_', ' ')))
+                );
+                return ageMatch && (conditionMatch || p.conditions.length === 0);
+            });
+
+            container.innerHTML = recommendedPrograms.map(program => {
+                const isAssigned = p.assignedPrograms.includes(program.code);
+                const programTasks = PROGRAM_TASKS[program.code] || [];
+
+                // Build tasks HTML for assigned programs
+                let tasksHTML = '';
+                if (isAssigned && programTasks.length > 0) {
+                    tasksHTML = `
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px dashed #e0e0e0;">
+                            <div style="font-weight: bold; margin-bottom: 10px;">✅ Tareas del programa:</div>
+                            ${programTasks.map(task => {
+                                const isCompleted = p.completedTasks.includes(task.id);
+                                return `
+                                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: ${isCompleted ? '#d4edda' : 'white'}; border-radius: 5px; margin: 5px 0; cursor: pointer;" onclick="toggleTask('${task.id}')">
+                                        <input type="checkbox" ${isCompleted ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;" onclick="event.stopPropagation(); toggleTask('${task.id}')">
+                                        <span style="flex: 1; ${isCompleted ? 'text-decoration: line-through; color: #666;' : ''}">${task.text}</span>
+                                        <span style="font-size: 0.8em; color: #666; background: #f0f0f0; padding: 3px 8px; border-radius: 10px;">${getCategoryLabel(task.category)}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="program-card ${isAssigned ? 'assigned' : ''}">
+                        <div class="program-header">
+                            <div class="program-name">${program.name}</div>
+                            <button class="assign-button ${isAssigned ? 'assigned' : ''}"
+                                    onclick="toggleProgram('${program.code}')">
+                                ${isAssigned ? '✓ Inscrito' : '+ Inscribir'}
+                            </button>
+                        </div>
+                        <div style="color: #666; margin: 10px 0;">${program.description}</div>
+                        <div style="font-size: 0.9em; color: #666;">
+                            📍 ${program.city} - ${program.center}
+                        </div>
+                        <div style="margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-size: 0.9em;">
+                            📊 <strong>Resultado esperado:</strong> ${program.expectedReduction}
+                        </div>
+                        ${tasksHTML}
+                    </div>
+                `;
+            }).join('');
+
+            if (recommendedPrograms.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No hay programas recomendados para este perfil.</p>';
+            }
+        }
+
+        function toggleProgram(programCode) {
+            const p = currentPatientDetail;
+            const index = p.assignedPrograms.indexOf(programCode);
+
+            if (index === -1) {
+                // Open enrollment modal instead of directly enrolling
+                openEnrollmentModal(programCode);
+            } else {
+                // Unenroll directly
+                p.assignedPrograms.splice(index, 1);
+                p.points -= 100;
+                renderTamagotchiDetail();
+            }
+        }
+
+        function openEnrollmentModal(programCode) {
+            const program = HEALTH_PROGRAMS.find(p => p.code === programCode);
+            if (!program) return;
+
+            // Set program info
+            pendingEnrollment.programCode = programCode;
+            pendingEnrollment.programName = program.name;
+            document.getElementById('modalProgramName').textContent = program.name;
+
+            // Reset selections
+            document.getElementById('citySelect').value = '';
+            document.getElementById('clinicSelect').innerHTML = '<option value="">Primero seleccione una ciudad</option>';
+            document.getElementById('enrollmentSummary').style.display = 'none';
+            document.getElementById('confirmEnrollBtn').disabled = true;
+
+            // Render time slots
+            renderTimeSlots();
+
+            // Show modal
+            document.getElementById('enrollmentModal').classList.add('active');
+        }
+
+        function closeEnrollmentModal() {
+            document.getElementById('enrollmentModal').classList.remove('active');
+            pendingEnrollment = {
+                programCode: null,
+                programName: null,
+                city: null,
+                clinic: null,
+                time: null
+            };
+        }
+
+        function renderTimeSlots() {
+            const container = document.getElementById('timeSlots');
+            container.innerHTML = TIME_SLOTS.map((slot, index) => `
+                <div class="time-slot" onclick="selectTimeSlot(${index})">
+                    ${slot}
+                </div>
+            `).join('');
+        }
+
+        function updateClinics() {
+            const citySelect = document.getElementById('citySelect');
+            const clinicSelect = document.getElementById('clinicSelect');
+            const city = citySelect.value;
+
+            pendingEnrollment.city = city;
+
+            if (city && COLSANITAS_CLINICS[city]) {
+                clinicSelect.innerHTML = `
+                    <option value="">Seleccione una clínica</option>
+                    ${COLSANITAS_CLINICS[city].map(clinic => `
+                        <option value="${clinic}">${clinic}</option>
+                    `).join('')}
+                `;
+                clinicSelect.disabled = false;
+            } else {
+                clinicSelect.innerHTML = '<option value="">Primero seleccione una ciudad</option>';
+                clinicSelect.disabled = true;
+                pendingEnrollment.clinic = null;
+            }
+
+            updateSummary();
+        }
+
+        function selectTimeSlot(index) {
+            // Remove previous selection
+            document.querySelectorAll('.time-slot').forEach(slot => slot.classList.remove('selected'));
+
+            // Select clicked slot
+            const slots = document.querySelectorAll('.time-slot');
+            slots[index].classList.add('selected');
+
+            pendingEnrollment.time = TIME_SLOTS[index];
+
+            updateSummary();
+        }
+
+        // Listen to clinic selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const clinicSelect = document.getElementById('clinicSelect');
+            if (clinicSelect) {
+                clinicSelect.addEventListener('change', function() {
+                    pendingEnrollment.clinic = this.value;
+                    updateSummary();
+                });
+            }
+        });
+
+        function updateSummary() {
+            const summary = document.getElementById('enrollmentSummary');
+            const confirmBtn = document.getElementById('confirmEnrollBtn');
+
+            // Check if all fields are filled
+            const allFilled = pendingEnrollment.city &&
+                            pendingEnrollment.clinic &&
+                            pendingEnrollment.time;
+
+            if (allFilled) {
+                summary.style.display = 'block';
+                document.getElementById('summaryProgram').textContent = pendingEnrollment.programName;
+                document.getElementById('summaryCity').textContent = getCityName(pendingEnrollment.city);
+                document.getElementById('summaryClinic').textContent = pendingEnrollment.clinic;
+                document.getElementById('summaryTime').textContent = pendingEnrollment.time;
+                confirmBtn.disabled = false;
+            } else {
+                summary.style.display = 'none';
+                confirmBtn.disabled = true;
+            }
+        }
+
+        function getCityName(cityCode) {
+            const names = {
+                'bogota': 'Bogotá',
+                'medellin': 'Medellín',
+                'cali': 'Cali',
+                'barranquilla': 'Barranquilla',
+                'cartagena': 'Cartagena'
+            };
+            return names[cityCode] || cityCode;
+        }
+
+        function confirmEnrollment() {
+            const p = currentPatientDetail;
+
+            // Add program to patient
+            p.assignedPrograms.push(pendingEnrollment.programCode);
+            p.points += 100; // Bonus for enrolling
+
+            // Store enrollment details
+            if (!p.enrollmentDetails) {
+                p.enrollmentDetails = {};
+            }
+            p.enrollmentDetails[pendingEnrollment.programCode] = {
+                city: pendingEnrollment.city,
+                clinic: pendingEnrollment.clinic,
+                time: pendingEnrollment.time,
+                enrolledDate: new Date().toISOString()
+            };
+
+            // Close modal
+            closeEnrollmentModal();
+
+            // Re-render
+            renderTamagotchiDetail();
+        }
+
+        function toggleTask(taskId) {
+            const p = currentPatientDetail;
+            const index = p.completedTasks.indexOf(taskId);
+
+            if (index === -1) {
+                p.completedTasks.push(taskId);
+                p.points += 25; // Points for completing task
+                p.healthScore = Math.min(100, p.healthScore + 1);
+            } else {
+                p.completedTasks.splice(index, 1);
+                p.points -= 25;
+                p.healthScore = Math.max(0, p.healthScore - 1);
+            }
+
+            renderTamagotchiDetail();
+        }
+
+        function toggleHabit(habitId) {
+            const p = currentPatientDetail;
+            const index = p.completedHabits.indexOf(habitId);
+
+            if (index === -1) {
+                p.completedHabits.push(habitId);
+                p.points += 15; // Points for healthy habit
+                p.healthScore = Math.min(100, p.healthScore + 2);
+            } else {
+                p.completedHabits.splice(index, 1);
+                p.points -= 15;
+                p.healthScore = Math.max(0, p.healthScore - 2);
+            }
+
+            renderTamagotchiDetail();
+        }
+
+        function getCategoryLabel(category) {
+            const labels = {
+                'monitoring': '📊 Monitoreo',
+                'medication': '💊 Medicación',
+                'appointment': '📅 Cita',
+                'labs': '🔬 Laboratorio',
+                'activity': '🏃 Actividad',
+                'education': '📚 Educación',
+                'prevention': '🛡️ Prevención',
+                'home_visit': '🏠 Domicilio',
+                'mental_health': '🧠 Salud Mental',
+                'nutrition': '🥗 Nutrición',
+                'hydration': '💧 Hidratación',
+                'sleep': '😴 Descanso'
+            };
+            return labels[category] || category;
+        }
+
+        function renderUniversalHabits() {
+            const p = currentPatientDetail;
+
+            // Find or create habits container
+            let habitsContainer = document.getElementById('habitsContainer');
+            if (!habitsContainer) {
+                const programsSection = document.querySelector('.programs-section');
+                const habitsSection = document.createElement('div');
+                habitsSection.className = 'programs-section';
+                habitsSection.style.marginTop = '30px';
+                habitsSection.innerHTML = `
+                    <h3 style="margin-bottom: 20px;">🌟 Hábitos Saludables (Todos los pacientes)</h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Prevención de burnout, tabaco, alcohol y promoción de bienestar
+                    </p>
+                    <div id="habitsContainer"></div>
+                `;
+                programsSection.parentNode.insertBefore(habitsSection, programsSection);
+                habitsContainer = document.getElementById('habitsContainer');
+            }
+
+            habitsContainer.innerHTML = UNIVERSAL_HABITS.map(habit => {
+                const isCompleted = p.completedHabits.includes(habit.id);
+                return `
+                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: ${isCompleted ? '#d4edda' : 'white'}; border-radius: 10px; margin: 10px 0; cursor: pointer; border: 2px solid ${isCompleted ? '#28a745' : '#e0e0e0'};" onclick="toggleHabit('${habit.id}')">
+                        <input type="checkbox" ${isCompleted ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;" onclick="event.stopPropagation(); toggleHabit('${habit.id}')">
+                        <span style="font-size: 1.5em;">${habit.icon}</span>
+                        <span style="flex: 1; font-weight: ${isCompleted ? 'normal' : 'bold'}; ${isCompleted ? 'text-decoration: line-through; color: #666;' : ''}">${habit.text}</span>
+                        <span style="font-size: 0.8em; color: white; background: var(--primary-turquoise); padding: 5px 12px; border-radius: 15px;">+15 pts</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGoals() {
+            const p = currentPatientDetail;
+
+            // Find or create goals container
+            let goalsContainer = document.getElementById('goalsContainer');
+            if (!goalsContainer) {
+                const programsSection = document.querySelector('.programs-section');
+                const goalsSection = document.createElement('div');
+                goalsSection.className = 'programs-section';
+                goalsSection.style.marginTop = '30px';
+                goalsSection.innerHTML = `
+                    <h3 style="margin-bottom: 20px;">🎯 Objetivos de Salud</h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Metas personalizadas según condición médica
+                    </p>
+                    <div id="goalsContainer"></div>
+                `;
+                programsSection.parentNode.insertBefore(goalsSection, programsSection.nextSibling);
+                goalsContainer = document.getElementById('goalsContainer');
+            }
+
+            goalsContainer.innerHTML = p.goals.map((goal, index) => `
+                <div style="background: white; padding: 20px; border-radius: 10px; margin: 15px 0; border-left: 4px solid var(--primary-turquoise);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="font-weight: bold; font-size: 1.1em;">${goal.text}</div>
+                        <div style="font-size: 1.3em; color: ${goal.progress >= 80 ? '#28a745' : goal.progress >= 50 ? '#ffc107' : '#ff6b6b'}; font-weight: bold;">${goal.progress}%</div>
+                    </div>
+                    <div style="width: 100%; height: 12px; background: #e0e0e0; border-radius: 6px; overflow: hidden;">
+                        <div style="width: ${goal.progress}%; height: 100%; background: linear-gradient(90deg, var(--primary-green), var(--primary-turquoise)); border-radius: 6px; transition: width 0.5s ease;"></div>
+                    </div>
+                    ${goal.progress === 100 ? '<div style="margin-top: 10px; color: #28a745; font-weight: bold;">🎉 ¡Meta alcanzada!</div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function backToFamily() {
+            showView('family');
+            renderFamilyDashboard();
+        }
+
+        function addPatient() {
+            alert('Funcionalidad de agregar nuevo miembro próximamente.');
+        }
+
+        function showView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`${viewName}-view`).classList.add('active');
+        }
+    </script>
+</body>
+</html>

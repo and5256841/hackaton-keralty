@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gemelo Digital – Interacción por Voz + Datos de Wearable (Simulado)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #050811;
+      --bg-card: #0b1220;
+      --bg-soft: #111827;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --accent-strong: #0ea5e9;
+      --highlight: #22c55e;
+      --danger: #fb7185;
+      --text-primary: #e5e7eb;
+      --text-secondary: #9ca3af;
+      --border-soft: #1f2933;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
+      color: var(--text-primary);
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 12px;
+    }
+
+    .shell {
+      max-width: 1100px;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 18px;
+      border: 1px solid rgba(30, 64, 175, 0.5);
+      box-shadow: 0 22px 70px rgba(15, 23, 42, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header.app-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(90deg, #020617, #0b1120);
+    }
+
+    .app-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .app-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .app-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    main.app-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr);
+      min-height: 520px;
+    }
+
+    @media (max-width: 900px) {
+      main.app-main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Panel gemelo digital */
+    .twin-panel {
+      padding: 14px;
+      border-right: 1px solid var(--border-soft);
+      background: radial-gradient(circle at top, #0f172a 0, #020617 80%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-secondary);
+    }
+
+    .twin-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border-soft);
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    @media (max-width: 600px) {
+      .twin-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .avatar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .avatar-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 180deg,
+        #22c55e,
+        #38bdf8,
+        #a855f7,
+        #f97316,
+        #22c55e
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .avatar-inner {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #38bdf8 0, #0f172a 55%);
+      border: 2px solid rgba(15, 23, 42, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .avatar-status {
+      position: absolute;
+      bottom: 6px;
+      right: 8px;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--highlight);
+      border: 2px solid #020617;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+    }
+
+    .avatar-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .twin-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .twin-name {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .twin-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #020617;
+      color: var(--text-secondary);
+    }
+
+    .chip.accent {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .metrics-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border-soft);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .metrics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metrics-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-secondary);
+    }
+
+    .pill.ok {
+      border-color: var(--highlight);
+      color: var(--highlight);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 8px;
+    }
+
+    .metric-box {
+      background: var(--bg-soft);
+      border-radius: 12px;
+      padding: 8px;
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      font-size: 11px;
+    }
+
+    .metric-label {
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 10px;
+    }
+
+    .metric-value {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .metric-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #020617;
+      font-weight: 600;
+    }
+
+    .btn.secondary {
+      background: #020617;
+      border: 1px solid var(--border-soft);
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .helper-text {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Panel conversación */
+    .conversation-panel {
+      padding: 14px;
+      background: #020617;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .conv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .conv-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--highlight);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
+    }
+
+    .status-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .conv-body {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      background: radial-gradient(circle at top, #0b1120 0, #020617 80%);
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    .conv-footer {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .conv-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .voice-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-strong);
+      color: #020617;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .voice-btn.listening {
+      background: #dc2626;
+      color: #fee2e2;
+      box-shadow: 0 0 12px rgba(248, 113, 113, 0.8);
+    }
+
+    .voice-indicator {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .text-input {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      padding: 7px 12px;
+      background: #020617;
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .send-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 10px;
+      background: #4b5563;
+      color: var(--text-primary);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .send-btn:active {
+      transform: scale(0.97);
+    }
+
+    .transcript {
+      font-size: 11px;
+      color: var(--text-secondary);
+      min-height: 16px;
+    }
+
+    .bubble-row {
+      display: flex;
+      margin-bottom: 6px;
+    }
+
+    .bubble-row.user {
+      justify-content: flex-end;
+    }
+
+    .bubble-row.bot {
+      justify-content: flex-start;
+    }
+
+    .bubble {
+      max-width: 80%;
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: var(--bg-soft);
+      border: 1px solid rgba(31, 41, 55, 0.8);
+      position: relative;
+    }
+
+    .bubble.user {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+
+    .bubble-meta {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      text-align: right;
+    }
+
+    .bubble strong {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="app-header">
+      <div class="app-title-block">
+        <div class="app-title">Gemelo Digital en Salud · Demo Voz + Wearables (Simulado)</div>
+        <div class="app-subtitle">
+          Interacción con tu yo del futuro usando voz, texto y datos de smartwatch ficticios (MVP solo front-end).
+        </div>
+      </div>
+      <div class="badge">Hackatón · MVP sintético</div>
+    </header>
+
+    <main class="app-main">
+      <!-- Panel del Gemelo Digital -->
+      <section class="twin-panel">
+        <div class="panel-title">Gemelo digital</div>
+
+        <div class="twin-card">
+          <div class="avatar-wrapper">
+            <div class="avatar-circle">
+              <div class="avatar-inner" id="avatarInitials">F</div>
+              <div class="avatar-status"></div>
+            </div>
+            <div class="avatar-label">Tu yo del futuro · Simulado</div>
+          </div>
+
+          <div class="twin-info">
+            <div class="twin-name" id="twinName">Gemelo sin nombre</div>
+            <div class="twin-meta" id="twinMeta">
+              Edad estimada: – · Riesgo: sin calcular · Dispositivo: no conectado
+            </div>
+            <div class="chips" id="twinChips">
+              <span class="chip">Perfil no configurado</span>
+              <span class="chip">Esperando tus respuestas…</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-card">
+          <div class="metrics-header">
+            <div class="metrics-title">Datos de smartwatch (simulados)</div>
+            <span class="pill ok" id="wearableStatus">Sincronización simulada</span>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-box">
+              <div class="metric-label">Frecuencia cardíaca</div>
+              <div class="metric-value" id="metricHR">–</div>
+              <div class="metric-sub">latidos por minuto</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Pasos de hoy</div>
+              <div class="metric-value" id="metricSteps">–</div>
+              <div class="metric-sub">progreso diario simulado</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Sueño promedio</div>
+              <div class="metric-value" id="metricSleep">–</div>
+              <div class="metric-sub">horas / noche (últimos 7 días)</div>
+            </div>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn" id="btnConnectWearable">
+              Conectar smartwatch (simulado) ⌚
+            </button>
+            <button class="btn secondary" id="btnRandomize">
+              Actualizar datos aleatorios
+            </button>
+          </div>
+
+          <div class="helper-text">
+            En un entorno real, estas métricas vendrían de una API de dispositivo
+            (Apple Health, Google Fit, reloj propio) y se almacenarían en el backend
+            junto con los datos clínicos del asegurador.
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel de conversación -->
+      <section class="conversation-panel">
+        <div class="conv-header">
+          <div>
+            <div class="conv-title">Habla con tu yo del futuro</div>
+            <div class="status-label">
+              Esta interacción está <strong>simulada en el navegador</strong>. Donde aquí ves reglas simples,
+              en producción estaría la API de OpenAI.
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="status-dot"></div>
+            <div class="status-label" id="aiStatus">Listo para escuchar</div>
+          </div>
+        </div>
+
+        <div id="convBody" class="conv-body"></div>
+
+        <div class="conv-footer">
+          <div class="conv-row">
+            <button id="voiceBtn" class="voice-btn">
+              🎙️ Hablar
+            </button>
+            <span id="voiceIndicator" class="voice-indicator">
+              Haz clic en "Hablar" para usar reconocimiento de voz (Chrome recomendado).
+            </span>
+          </div>
+          <div class="conv-row">
+            <input
+              id="textInput"
+              class="text-input"
+              type="text"
+              placeholder="O escribe tu mensaje aquí…"
+            />
+            <button id="sendTextBtn" class="send-btn">Enviar</button>
+          </div>
+          <div id="transcript" class="transcript"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ===========================
+    // 1. Estado del Gemelo Digital (solo front-end)
+    // ===========================
+    const digitalTwin = {
+      name: null,
+      age: null,
+      riskCategory: "sin calcular",
+      healthProfile: null, // texto breve
+      devices: {
+        smartwatch: {
+          connected: false,
+          heartRate: null,
+          steps: null,
+          sleepHours: null,
+        },
+      },
+      conversationSteps: 0,
+    };
+
+    // ===========================
+    // 2. Utilidades de UI
+    // ===========================
+    const twinNameEl = document.getElementById("twinName");
+    const twinMetaEl = document.getElementById("twinMeta");
+    const twinChipsEl = document.getElementById("twinChips");
+    const avatarInitialsEl = document.getElementById("avatarInitials");
+
+    const hrEl = document.getElementById("metricHR");
+    const stepsEl = document.getElementById("metricSteps");
+    const sleepEl = document.getElementById("metricSleep");
+    const wearableStatusEl = document.getElementById("wearableStatus");
+
+    const convBody = document.getElementById("convBody");
+    const textInput = document.getElementById("textInput");
+    const sendTextBtn = document.getElementById("sendTextBtn");
+    const voiceBtn = document.getElementById("voiceBtn");
+    const voiceIndicator = document.getElementById("voiceIndicator");
+    const transcriptEl = document.getElementById("transcript");
+    const aiStatusEl = document.getElementById("aiStatus");
+
+    const btnConnectWearable = document.getElementById("btnConnectWearable");
+    const btnRandomize = document.getElementById("btnRandomize");
+
+    function formatTime() {
+      const d = new Date();
+      let h = d.getHours();
+      let m = d.getMinutes();
+      if (h < 10) h = "0" + h;
+      if (m < 10) m = "0" + m;
+      return `${h}:${m}`;
+    }
+
+    function updateTwinUI() {
+      const name = digitalTwin.name || "Gemelo sin nombre";
+      twinNameEl.textContent = name;
+
+      if (digitalTwin.name) {
+        const initials = digitalTwin.name
+          .split(" ")
+          .filter(Boolean)
+          .map((p) => p[0]?.toUpperCase())
+          .join("")
+          .slice(0, 2);
+        avatarInitialsEl.textContent = initials || "F";
+      }
+
+      const ageText = digitalTwin.age ? `${digitalTwin.age} años` : "–";
+      const riskText = digitalTwin.riskCategory || "sin calcular";
+      const deviceText = digitalTwin.devices.smartwatch.connected
+        ? "smartwatch conectado (simulado)"
+        : "sin dispositivos conectados";
+
+      twinMetaEl.textContent = `Edad estimada: ${ageText} · Riesgo: ${riskText} · Dispositivo: ${deviceText}`;
+
+      twinChipsEl.innerHTML = "";
+
+      const chip1 = document.createElement("span");
+      chip1.className = "chip accent";
+      chip1.textContent = `Riesgo: ${riskText}`;
+      twinChipsEl.appendChild(chip1);
+
+      const chip2 = document.createElement("span");
+      chip2.className = "chip";
+      const hp = digitalTwin.healthProfile || "perfil en construcción";
+      chip2.textContent = `Perfil: ${hp}`;
+      twinChipsEl.appendChild(chip2);
+
+      if (digitalTwin.devices.smartwatch.connected) {
+        const chip3 = document.createElement("span");
+        chip3.className = "chip";
+        chip3.textContent = "Datos de smartwatch sincronizados (simulado)";
+        twinChipsEl.appendChild(chip3);
+      } else {
+        const chip3 = document.createElement("span");
+        chip3.className = "chip";
+        chip3.textContent = "Puedes conectar un smartwatch (demo)";
+        twinChipsEl.appendChild(chip3);
+      }
+    }
+
+    function updateWearableUI() {
+      const w = digitalTwin.devices.smartwatch;
+      if (w.heartRate != null) hrEl.textContent = w.heartRate + " bpm";
+      else hrEl.textContent = "–";
+
+      if (w.steps != null) stepsEl.textContent = w.steps.toLocaleString();
+      else stepsEl.textContent = "–";
+
+      if (w.sleepHours != null) sleepEl.textContent = w.sleepHours.toFixed(1);
+      else sleepEl.textContent = "–";
+
+      if (w.connected) {
+        wearableStatusEl.textContent = "Smartwatch conectado (demo)";
+        wearableStatusEl.classList.add("ok");
+      } else {
+        wearableStatusEl.textContent = "Sin smartwatch";
+        wearableStatusEl.classList.remove("ok");
+      }
+    }
+
+    function appendBubble(text, from = "bot") {
+      const row = document.createElement("div");
+      row.className = `bubble-row ${from}`;
+      const b = document.createElement("div");
+      b.className = `bubble ${from}`;
+      b.innerHTML = text;
+      const meta = document.createElement("div");
+      meta.className = "bubble-meta";
+      meta.textContent = formatTime();
+      b.appendChild(meta);
+      row.appendChild(b);
+      convBody.appendChild(row);
+      convBody.scrollTop = convBody.scrollHeight;
+    }
+
+    // ===========================
+    // 3. Lógica de conversación (reglas simples)
+    //    (Aquí, en producción, iría la llamada al modelo de OpenAI)
+    // ===========================
+    function estimateRisk() {
+      const age = Number(digitalTwin.age || 0);
+      const hr = digitalTwin.devices.smartwatch.heartRate;
+      const steps = digitalTwin.devices.smartwatch.steps;
+
+      if (!age) {
+        digitalTwin.riskCategory = "sin calcular";
+        digitalTwin.healthProfile = "perfil insuficiente";
+        return;
+      }
+
+      // Regla muy simple solo para demo (no clínica)
+      if (age >= 60 || (hr && hr > 95)) {
+        digitalTwin.riskCategory = "riesgo elevado (simulado)";
+        digitalTwin.healthProfile = "necesita seguimiento cercano";
+      } else if (age >= 40 || (steps && steps < 4000)) {
+        digitalTwin.riskCategory = "riesgo moderado (simulado)";
+        digitalTwin.healthProfile = "beneficio alto con prevención";
+      } else {
+        digitalTwin.riskCategory = "riesgo bajo (simulado)";
+        digitalTwin.healthProfile = "enfocado en mantener hábitos";
+      }
+    }
+
+    function generateBotReply(userText) {
+      const step = digitalTwin.conversationSteps;
+
+      // Normalizamos texto
+      const lower = userText.toLowerCase();
+
+      // Paso 0: saludo e instrucción
+      if (step === 0) {
+        digitalTwin.conversationSteps = 1;
+        return (
+          "Hola, soy tu yo del futuro, tu <strong>Gemelo Digital de Salud</strong>.<br>" +
+          "Para empezar, dime por favor tu <strong>nombre</strong>."
+        );
+      }
+
+      // Paso 1: capturar nombre
+      if (step === 1) {
+        digitalTwin.name = userText.trim();
+        digitalTwin.conversationSteps = 2;
+        updateTwinUI();
+        return (
+          `Encantado, <strong>${digitalTwin.name}</strong>.<br>` +
+          "Ahora dime, ¿cuántos <strong>años</strong> tienes?"
+        );
+      }
+
+      // Paso 2: capturar edad
+      if (step === 2) {
+        const ageMatch = userText.match(/\d+/);
+        if (!ageMatch) {
+          return "No pude identificar tu edad. Intenta decir algo como: <strong>Tengo 45 años</strong>.";
+        }
+        const age = parseInt(ageMatch[0], 10);
+        if (age <= 0 || age > 110) {
+          return "Esa edad no parece válida para este demo 🤖. Intenta con otra.";
+        }
+        digitalTwin.age = age;
+        digitalTwin.conversationSteps = 3;
+        estimateRisk();
+        updateTwinUI();
+        return (
+          `Perfecto, registraré <strong>${age} años</strong> en tu gemelo digital.<br>` +
+          "¿Usas algún <strong>reloj inteligente</strong> o pulsera que mida tus pasos y frecuencia cardíaca?"
+        );
+      }
+
+      // Paso 3: preguntar por smartwatch
+      if (step === 3) {
+        if (lower.includes("sí") || lower.includes("si") || lower.includes("watch") || lower.includes("reloj")) {
+          // Conectamos de manera simulada
+          digitalTwin.devices.smartwatch.connected = true;
+          randomizeWearableData(true);
+          estimateRisk();
+          updateTwinUI();
+          updateWearableUI();
+          digitalTwin.conversationSteps = 4;
+          return (
+            "Genial. He simulado la conexión con tu <strong>smartwatch</strong>.<br>" +
+            `Ahora mismo veo una frecuencia cardíaca de <strong>${digitalTwin.devices.smartwatch.heartRate} bpm</strong> ` +
+            `y unos <strong>${digitalTwin.devices.smartwatch.steps.toLocaleString()} pasos</strong> hoy (datos ficticios).<br>` +
+            "¿Qué te gustaría saber: <strong>tu riesgo futuro</strong>, <strong>recomendaciones</strong> o <strong>programas de salud</strong> que te convienen?"
+          );
+        } else {
+          digitalTwin.devices.smartwatch.connected = false;
+          randomizeWearableData(false);
+          estimateRisk();
+          updateTwinUI();
+          updateWearableUI();
+          digitalTwin.conversationSteps = 4;
+          return (
+            "No pasa nada. Voy a trabajar con datos de ejemplo, como si tuvieras un dispositivo básico.<br>" +
+            "Con eso puedo simular tu riesgo y mostrarte qué programas preventivos podrían servirte mejor.<br>" +
+            "¿Te interesa que hablemos de <strong>riesgo futuro</strong> o de <strong>programas de prevención</strong>?"
+          );
+        }
+      }
+
+      // Paso 4+: conversación libre simple basada en estado del gemelo
+      if (lower.includes("riesgo") || lower.includes("riesgos")) {
+        estimateRisk();
+        updateTwinUI();
+        const r = digitalTwin.riskCategory;
+        return (
+          `Según los datos que tengo (edad: ${digitalTwin.age || "–"} años, ` +
+          `FC: ${digitalTwin.devices.smartwatch.heartRate || "–"} bpm, pasos: ` +
+          `${digitalTwin.devices.smartwatch.steps || "–"}), tu categoría es:<br>` +
+          `<strong>${r}</strong>.<br><br>` +
+          "Esto es solo una <strong>simulación</strong>, pero en la plataforma real este cálculo se conectaría con tus " +
+          "laboratorios, diagnósticos y datos de uso de servicios para personalizar aún más la invitación."
+        );
+      }
+
+      if (
+        lower.includes("programa") ||
+        lower.includes("programas") ||
+        lower.includes("prevención") ||
+        lower.includes("prevencion")
+      ) {
+        const age = digitalTwin.age || 0;
+        let recommendation =
+          "un <strong>programa de hábitos saludables</strong> con foco en actividad física y alimentación.";
+        if (age >= 50) {
+          recommendation =
+            "un <strong>programa de riesgo cardiovascular</strong> con seguimiento de presión arterial, peso y controles periódicos.";
+        } else if (age >= 30) {
+          recommendation =
+            "un <strong>programa de prevención metabólica</strong> (peso, glucosa, control de estrés).";
+        }
+        return (
+          `Con la información que tengo, te sugeriría ${recommendation}<br><br>` +
+          "En la demo del hackatón, este gemelo digital enviaría una invitación personalizada " +
+          "por WhatsApp o correo, con enlace directo para agendar tu <strong>primera cita</strong> en el programa."
+        );
+      }
+
+      if (lower.includes("gracias") || lower.includes("ok") || lower.includes("listo")) {
+        return (
+          "A ti. Recuerda que soy solo una <strong>maqueta interactiva</strong> de tu gemelo digital.<br>" +
+          "Pero ya viste cómo podemos combinar tu información personal, los datos de tu dispositivo " +
+          "y la IA para crear invitaciones a programas de salud que sí hablan tu idioma."
+        );
+      }
+
+      // Respuesta genérica: mencionar que en producción respondería OpenAI
+      return (
+        "Estoy usando reglas simples para esta demo, pero en un entorno real aquí respondería " +
+        "un modelo de lenguaje de OpenAI con contexto de tu gemelo digital, tus datos y los programas de la aseguradora."
+      );
+    }
+
+    // ===========================
+    // 4. Simulación de datos de smartwatch
+    // ===========================
+    function randomizeWearableData(forceConnect = false) {
+      if (forceConnect) digitalTwin.devices.smartwatch.connected = true;
+      const w = digitalTwin.devices.smartwatch;
+
+      const baseHR = 68 + Math.round(Math.random() * 30); // 68–98 bpm
+      const baseSteps = 2000 + Math.round(Math.random() * 8000); // 2k–10k
+      const baseSleep = 5 + Math.random() * 3; // 5–8h
+
+      w.heartRate = baseHR;
+      w.steps = baseSteps;
+      w.sleepHours = baseSleep;
+
+      updateWearableUI();
+      estimateRisk();
+      updateTwinUI();
+    }
+
+    btnConnectWearable.addEventListener("click", () => {
+      randomizeWearableData(true);
+      appendBubble(
+        "He simulado la conexión con tu smartwatch. A partir de ahora, tus métricas se actualizarán y alimentarán tu gemelo digital.",
+        "bot"
+      );
+    });
+
+    btnRandomize.addEventListener("click", () => {
+      randomizeWearableData(digitalTwin.devices.smartwatch.connected);
+      appendBubble(
+        "Actualicé tus datos de smartwatch con nuevos valores ficticios para la demo.",
+        "bot"
+      );
+    });
+
+    // Intervalo para simular ligera variación de la frecuencia cardíaca
+    setInterval(() => {
+      const w = digitalTwin.devices.smartwatch;
+      if (!w.connected || w.heartRate == null) return;
+      const delta = Math.round((Math.random() - 0.5) * 4); // -2 a +2
+      w.heartRate = Math.max(55, Math.min(110, w.heartRate + delta));
+      hrEl.textContent = w.heartRate + " bpm";
+    }, 4000);
+
+    // ===========================
+    // 5. Reconocimiento de voz + síntesis
+    // ===========================
+    let recognition = null;
+    let listening = false;
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = "es-ES";
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        listening = true;
+        voiceBtn.classList.add("listening");
+        voiceIndicator.textContent = "Escuchando… habla ahora.";
+        transcriptEl.textContent = "";
+      };
+
+      recognition.onend = () => {
+        listening = false;
+        voiceBtn.classList.remove("listening");
+        voiceIndicator.textContent = "Reconocimiento detenido.";
+      };
+
+      recognition.onresult = (event) => {
+        let interimTranscript = "";
+        let finalTranscript = "";
+        for (let i = 0; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            finalTranscript += result[0].transcript;
+          } else {
+            interimTranscript += result[0].transcript;
+          }
+        }
+        transcriptEl.textContent =
+          finalTranscript || interimTranscript || "";
+        if (finalTranscript) {
+          handleUserMessage(finalTranscript.trim(), true);
+        }
+      };
+    } else {
+      voiceIndicator.textContent =
+        "Reconocimiento de voz no disponible en este navegador (usa Chrome para la demo).";
+      voiceBtn.disabled = true;
+      voiceBtn.style.opacity = 0.6;
+    }
+
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      const utter = new SpeechSynthesisUtterance(
+        text.replace(/<[^>]+>/g, "")
+      );
+      utter.lang = "es-ES";
+      utter.rate = 1.02;
+      window.speechSynthesis.speak(utter);
+    }
+
+    voiceBtn.addEventListener("click", () => {
+      if (!recognition) return;
+      if (!listening) {
+        recognition.start();
+      } else {
+        recognition.stop();
+      }
+    });
+
+    // ===========================
+    // 6. Manejo de texto entrada + flujo
+    // ===========================
+    function handleUserMessage(rawText, fromVoice = false) {
+      const text = rawText.trim();
+      if (!text) return;
+      appendBubble(text, "user");
+      aiStatusEl.textContent = "Procesando (reglas de demo)…";
+
+      const replyHtml = generateBotReply(text);
+      updateTwinUI();
+
+      setTimeout(() => {
+        appendBubble(replyHtml, "bot");
+        speak(replyHtml);
+        aiStatusEl.textContent = "Listo para escuchar";
+      }, 500);
+    }
+
+    sendTextBtn.addEventListener("click", () => {
+      const text = textInput.value.trim();
+      if (!text) return;
+      textInput.value = "";
+      handleUserMessage(text, false);
+    });
+
+    textInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendTextBtn.click();
+      }
+    });
+
+    // ===========================
+    // 7. Mensajes de bienvenida
+    // ===========================
+    window.addEventListener("load", () => {
+      appendBubble(
+        "Hola, soy tu <strong>Gemelo Digital de Salud</strong> en versión demo. " +
+          "Puedo hablar contigo por voz o texto y usar datos de un smartwatch simulado.",
+        "bot"
+      );
+      setTimeout(() => {
+        const initial = generateBotReply("");
+        appendBubble(initial, "bot");
+        updateTwinUI();
+      }, 600);
+    });
+  </script>
+</body>
+</html>

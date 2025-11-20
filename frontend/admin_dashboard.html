@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrador - Gemelo Digital</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #2563EB;
+            --primary-green: #10B981;
+            --primary-red: #EF4444;
+            --primary-yellow: #F59E0B;
+            --bg-dark: #1F2937;
+            --bg-light: #F9FAFB;
+            --text-dark: #111827;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding: 0;
+            margin: 0;
+        }
+
+        /* HEADER */
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1E40AF 100%);
+            color: white;
+            padding: 30px 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .admin-header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .admin-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* KPI CARDS */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .kpi-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .kpi-card-title {
+            font-size: 14px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-icon {
+            font-size: 32px;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .kpi-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .kpi-change.positive {
+            color: var(--primary-green);
+        }
+
+        .kpi-change.negative {
+            color: var(--primary-red);
+        }
+
+        /* CHARTS SECTION */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: var(--text-dark);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* FILTERS */
+        .filters-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .filter-button {
+            padding: 10px 20px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .filter-button:hover {
+            background: #1E40AF;
+        }
+
+        .filter-button.reset {
+            background: var(--text-light);
+        }
+
+        .filter-button.reset:hover {
+            background: #4B5563;
+        }
+
+        /* TABLE */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-header h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .table-header p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-light);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.enrolled {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge.not-enrolled {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .badge.scheduled {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .badge.high {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .badge.medium {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .badge.low {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        /* HEALTH BAR */
+        .health-bar-container {
+            width: 100px;
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .health-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .health-bar.excellent {
+            background: linear-gradient(90deg, #10B981, #059669);
+        }
+
+        .health-bar.good {
+            background: linear-gradient(90deg, #3B82F6, #2563EB);
+        }
+
+        .health-bar.fair {
+            background: linear-gradient(90deg, #F59E0B, #D97706);
+        }
+
+        .health-bar.poor {
+            background: linear-gradient(90deg, #EF4444, #DC2626);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-row {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        /* EXPORT BUTTON */
+        .export-button {
+            padding: 10px 20px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .export-button:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="admin-header">
+        <h1>🏥 Dashboard Administrador - Gemelo Digital</h1>
+        <p>Panel de control y métricas de la plataforma de salud</p>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-card-title">Pacientes Totales</span>
+                    <span class="kpi-icon">👥</span>
+                </div>
+                <div class="kpi-value" id="totalPatients">30</div>
+                <div class="kpi-change positive">
+                    <span>↑ 12%</span>
+                    <span>vs mes anterior</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-card-title">Enrollment Rate</span>
+                    <span class="kpi-icon">📊</span>
+                </div>
+                <div class="kpi-value" id="enrollmentRate" style="color: var(--primary-green);">85%</div>
+                <div class="kpi-change positive">
+                    <span>↑ +55%</span>
+                    <span>vs objetivo (30%)</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-card-title">Citas Agendadas</span>
+                    <span class="kpi-icon">📅</span>
+                </div>
+                <div class="kpi-value" id="scheduledAppointments" style="color: var(--primary-blue);">23</div>
+                <div class="kpi-change positive">
+                    <span>↑ 90%</span>
+                    <span>de inscritos agendaron</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-card-title">Salud Promedio</span>
+                    <span class="kpi-icon">❤️</span>
+                </div>
+                <div class="kpi-value" id="avgHealth" style="color: var(--primary-blue);">78%</div>
+                <div class="kpi-change positive">
+                    <span>↑ +8%</span>
+                    <span>mejora últimos 30 días</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-card-title">Puntos Promedio</span>
+                    <span class="kpi-icon">⭐</span>
+                </div>
+                <div class="kpi-value" id="avgPoints">1,245</div>
+                <div class="kpi-change positive">
+                    <span>↑ +320</span>
+                    <span>engagement alto</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-card-title">Racha Promedio</span>
+                    <span class="kpi-icon">🔥</span>
+                </div>
+                <div class="kpi-value" id="avgStreak">12</div>
+                <div class="kpi-change positive">
+                    <span>días</span>
+                    <span>retención excelente</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>📊 Distribución por Programa</h3>
+                <div class="chart-container">
+                    <canvas id="programsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>📈 Salud Promedio por Grupo de Edad</h3>
+                <div class="chart-container">
+                    <canvas id="healthByAgeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>🏙️ Distribución por Ciudad</h3>
+                <div class="chart-container">
+                    <canvas id="citiesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>⏰ Horarios Más Solicitados</h3>
+                <div class="chart-container">
+                    <canvas id="timeSlotsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filters-section">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label class="filter-label">🔍 Buscar paciente</label>
+                    <input type="text" class="filter-input" id="searchInput" placeholder="Nombre, DNI, ciudad...">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">📋 Programa</label>
+                    <select class="filter-input" id="programFilter">
+                        <option value="">Todos los programas</option>
+                        <option value="HYPERTENSION">Hipertensión</option>
+                        <option value="DIABETES">Diabetes</option>
+                        <option value="OBESITY">Obesidad</option>
+                        <option value="CARDIOVASCULAR">Cardiovascular</option>
+                        <option value="PRENATAL">Prenatal</option>
+                        <option value="PEDIATRIC">Pediátrico</option>
+                        <option value="GERIATRIC">Geriátrico</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">🏙️ Ciudad</label>
+                    <select class="filter-input" id="cityFilter">
+                        <option value="">Todas las ciudades</option>
+                        <option value="bogota">Bogotá</option>
+                        <option value="medellin">Medellín</option>
+                        <option value="cali">Cali</option>
+                        <option value="barranquilla">Barranquilla</option>
+                        <option value="cartagena">Cartagena</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-end;">
+                    <button class="filter-button" onclick="applyFilters()">Filtrar</button>
+                    <button class="filter-button reset" onclick="resetFilters()">Resetear</button>
+                    <button class="export-button" onclick="exportToCSV()">
+                        <span>📥</span>
+                        <span>Exportar CSV</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3>📋 Lista de Pacientes</h3>
+                <p id="tableInfo">Mostrando 30 de 30 pacientes</p>
+            </div>
+            <div class="table-container">
+                <table id="patientsTable">
+                    <thead>
+                        <tr>
+                            <th>DNI</th>
+                            <th>Nombre</th>
+                            <th>Edad</th>
+                            <th>Ciudad</th>
+                            <th>Programa</th>
+                            <th>Estado</th>
+                            <th>Salud</th>
+                            <th>Puntos</th>
+                            <th>Racha</th>
+                            <th>Última Actividad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTableBody">
+                        <tr>
+                            <td colspan="10" class="loading">Cargando pacientes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ========================================
+        // DATOS DE PACIENTES SINTÉTICOS
+        // ========================================
+        const PATIENTS_DATA = [
+            { dni: '1032456789', name: 'María González', age: 45, city: 'bogota', program: 'DIABETES', enrolled: true, scheduled: true, health: 68, points: 990, streak: 8, lastActivity: '2025-11-19', clinic: 'Clínica Reina Sofía', timeSlot: '9:00 AM - 11:00 AM' },
+            { dni: '1098765432', name: 'Carlos Rodríguez', age: 48, city: 'bogota', program: 'CARDIOVASCULAR', enrolled: true, scheduled: true, health: 80, points: 1240, streak: 14, lastActivity: '2025-11-19', clinic: 'Clínica Universitaria Colombia', timeSlot: '2:00 PM - 4:00 PM' },
+            { dni: '1045678901', name: 'Ana Martínez', age: 52, city: 'medellin', program: 'HYPERTENSION', enrolled: true, scheduled: true, health: 72, points: 1150, streak: 11, lastActivity: '2025-11-18', clinic: 'Clínica Colsanitas Medellín', timeSlot: '9:00 AM - 11:00 AM' },
+            { dni: '1056789012', name: 'Luis Hernández', age: 38, city: 'cali', program: 'OBESITY', enrolled: true, scheduled: false, health: 65, points: 820, streak: 6, lastActivity: '2025-11-17', clinic: 'Clínica Colsanitas Torre de Cali', timeSlot: '4:00 PM - 6:00 PM' },
+            { dni: '1067890123', name: 'Carmen Silva', age: 61, city: 'barranquilla', program: 'DIABETES', enrolled: true, scheduled: true, health: 70, points: 1090, streak: 9, lastActivity: '2025-11-19', clinic: 'Clínica Colsanitas Barranquilla', timeSlot: '7:00 AM - 9:00 AM' },
+            { dni: '1078901234', name: 'Jorge Pérez', age: 29, city: 'bogota', program: 'CARDIOVASCULAR', enrolled: false, scheduled: false, health: 85, points: 450, streak: 3, lastActivity: '2025-11-15', clinic: null, timeSlot: null },
+            { dni: '1089012345', name: 'Laura López', age: 34, city: 'medellin', program: 'PRENATAL', enrolled: true, scheduled: true, health: 88, points: 1380, streak: 15, lastActivity: '2025-11-19', clinic: 'Centro Médico Colsanitas El Poblado', timeSlot: '11:00 AM - 1:00 PM' },
+            { dni: '1090123456', name: 'Diego Torres', age: 56, city: 'cali', program: 'HYPERTENSION', enrolled: true, scheduled: true, health: 75, points: 1210, streak: 12, lastActivity: '2025-11-19', clinic: 'Centro Médico Colsanitas Norte', timeSlot: '2:00 PM - 4:00 PM' },
+            { dni: '1023456780', name: 'Sofía Ramírez', age: 12, city: 'bogota', program: 'PEDIATRIC', enrolled: true, scheduled: true, health: 95, points: 1850, streak: 21, lastActivity: '2025-11-19', clinic: 'Clínica Infantil Colsubsidio', timeSlot: '4:00 PM - 6:00 PM' },
+            { dni: '1034567891', name: 'Roberto Vargas', age: 67, city: 'cartagena', program: 'GERIATRIC', enrolled: true, scheduled: true, health: 73, points: 1050, streak: 10, lastActivity: '2025-11-18', clinic: 'Clínica Colsanitas Cartagena', timeSlot: '9:00 AM - 11:00 AM' },
+            { dni: '1045678902', name: 'Patricia Gómez', age: 42, city: 'medellin', program: 'DIABETES', enrolled: true, scheduled: true, health: 69, points: 980, streak: 7, lastActivity: '2025-11-19', clinic: 'Centro Médico Colsanitas Laureles', timeSlot: '7:00 AM - 9:00 AM' },
+            { dni: '1056789013', name: 'Fernando Castro', age: 51, city: 'bogota', program: 'OBESITY', enrolled: true, scheduled: false, health: 64, points: 790, streak: 5, lastActivity: '2025-11-16', clinic: 'Centro Médico Colsanitas Suba', timeSlot: '6:00 PM - 8:00 PM' },
+            { dni: '1067890124', name: 'Isabel Morales', age: 78, city: 'bogota', program: 'GERIATRIC', enrolled: true, scheduled: true, health: 70, points: 620, streak: 5, lastActivity: '2025-11-19', clinic: 'Clínica La Colina', timeSlot: '9:00 AM - 11:00 AM' },
+            { dni: '1078901235', name: 'Andrés Jiménez', age: 44, city: 'cali', program: 'HYPERTENSION', enrolled: true, scheduled: true, health: 74, points: 1180, streak: 11, lastActivity: '2025-11-18', clinic: 'Centro Médico Colsanitas Sur', timeSlot: '11:00 AM - 1:00 PM' },
+            { dni: '1089012346', name: 'Claudia Ruiz', age: 36, city: 'medellin', program: 'CARDIOVASCULAR', enrolled: false, scheduled: false, health: 82, points: 520, streak: 4, lastActivity: '2025-11-14', clinic: null, timeSlot: null },
+            { dni: '1090123457', name: 'Miguel Sánchez', age: 59, city: 'barranquilla', program: 'DIABETES', enrolled: true, scheduled: true, health: 71, points: 1120, streak: 10, lastActivity: '2025-11-19', clinic: 'Centro Médico Colsanitas Norte', timeSlot: '2:00 PM - 4:00 PM' },
+            { dni: '1023456781', name: 'Valentina Ortiz', age: 8, city: 'bogota', program: 'PEDIATRIC', enrolled: true, scheduled: true, health: 97, points: 1920, streak: 23, lastActivity: '2025-11-19', clinic: 'Clínica Infantil Colsubsidio', timeSlot: '4:00 PM - 6:00 PM' },
+            { dni: '1034567892', name: 'Ricardo Delgado', age: 63, city: 'cali', program: 'GERIATRIC', enrolled: true, scheduled: true, health: 72, points: 1040, streak: 9, lastActivity: '2025-11-18', clinic: 'Clínica Colsanitas Torre de Cali', timeSlot: '7:00 AM - 9:00 AM' },
+            { dni: '1045678903', name: 'Beatriz Navarro', age: 47, city: 'medellin', program: 'OBESITY', enrolled: true, scheduled: true, health: 66, points: 850, streak: 7, lastActivity: '2025-11-19', clinic: 'Clínica Las Américas', timeSlot: '9:00 AM - 11:00 AM' },
+            { dni: '1056789014', name: 'Javier Rojas', age: 33, city: 'cartagena', program: 'CARDIOVASCULAR', enrolled: true, scheduled: false, health: 83, points: 1310, streak: 13, lastActivity: '2025-11-17', clinic: 'Centro Médico Colsanitas Bocagrande', timeSlot: '2:00 PM - 4:00 PM' },
+            { dni: '1067890125', name: 'Gabriela Mendoza', age: 28, city: 'bogota', program: 'PRENATAL', enrolled: true, scheduled: true, health: 90, points: 1450, streak: 16, lastActivity: '2025-11-19', clinic: 'Clínica Reina Sofía', timeSlot: '11:00 AM - 1:00 PM' },
+            { dni: '1078901236', name: 'Héctor Fuentes', age: 54, city: 'medellin', program: 'HYPERTENSION', enrolled: true, scheduled: true, health: 76, points: 1230, streak: 12, lastActivity: '2025-11-19', clinic: 'Clínica Colsanitas Medellín', timeSlot: '9:00 AM - 11:00 AM' },
+            { dni: '1089012347', name: 'Natalia Cruz', age: 41, city: 'cali', program: 'DIABETES', enrolled: false, scheduled: false, health: 67, points: 480, streak: 3, lastActivity: '2025-11-13', clinic: null, timeSlot: null },
+            { dni: '1090123458', name: 'Sergio Medina', age: 72, city: 'barranquilla', program: 'GERIATRIC', enrolled: true, scheduled: true, health: 71, points: 980, streak: 8, lastActivity: '2025-11-18', clinic: 'Centro Médico Colsanitas Riomar', timeSlot: '7:00 AM - 9:00 AM' },
+            { dni: '1023456782', name: 'Carolina Vega', age: 49, city: 'bogota', program: 'OBESITY', enrolled: true, scheduled: true, health: 65, points: 820, streak: 6, lastActivity: '2025-11-19', clinic: 'Centro Médico Colsanitas El Polo', timeSlot: '4:00 PM - 6:00 PM' },
+            { dni: '1034567893', name: 'Daniel Parra', age: 35, city: 'medellin', program: 'CARDIOVASCULAR', enrolled: true, scheduled: true, health: 84, points: 1340, streak: 14, lastActivity: '2025-11-19', clinic: 'Centro Médico Colsanitas El Poblado', timeSlot: '2:00 PM - 4:00 PM' },
+            { dni: '1045678904', name: 'Liliana Ramos', age: 57, city: 'cali', program: 'DIABETES', enrolled: true, scheduled: true, health: 70, points: 1100, streak: 10, lastActivity: '2025-11-18', clinic: 'Centro Médico Colsanitas Norte', timeSlot: '9:00 AM - 11:00 AM' },
+            { dni: '1056789015', name: 'Esteban Molina', age: 10, city: 'bogota', program: 'PEDIATRIC', enrolled: true, scheduled: true, health: 96, points: 1880, streak: 22, lastActivity: '2025-11-19', clinic: 'Clínica Infantil Colsubsidio', timeSlot: '4:00 PM - 6:00 PM' },
+            { dni: '1067890126', name: 'Mariana Ríos', age: 31, city: 'cartagena', program: 'PRENATAL', enrolled: true, scheduled: true, health: 89, points: 1420, streak: 15, lastActivity: '2025-11-19', clinic: 'Clínica Colsanitas Cartagena', timeSlot: '11:00 AM - 1:00 PM' },
+            { dni: '1078901237', name: 'Pablo Acosta', age: 65, city: 'medellin', program: 'GERIATRIC', enrolled: true, scheduled: false, health: 73, points: 1060, streak: 9, lastActivity: '2025-11-17', clinic: 'Clínica Colsanitas Medellín', timeSlot: '7:00 AM - 9:00 AM' }
+        ];
+
+        // Store original data
+        let allPatients = [...PATIENTS_DATA];
+        let filteredPatients = [...PATIENTS_DATA];
+
+        // ========================================
+        // PROGRAM NAMES
+        // ========================================
+        const PROGRAM_NAMES = {
+            'HYPERTENSION': 'Hipertensión',
+            'DIABETES': 'Diabetes',
+            'OBESITY': 'Obesidad',
+            'CARDIOVASCULAR': 'Cardiovascular',
+            'PRENATAL': 'Prenatal',
+            'PEDIATRIC': 'Pediátrico',
+            'GERIATRIC': 'Geriátrico'
+        };
+
+        // ========================================
+        // CITY NAMES
+        // ========================================
+        const CITY_NAMES = {
+            'bogota': 'Bogotá',
+            'medellin': 'Medellín',
+            'cali': 'Cali',
+            'barranquilla': 'Barranquilla',
+            'cartagena': 'Cartagena'
+        };
+
+        // ========================================
+        // CALCULATE KPIs
+        // ========================================
+        function calculateKPIs() {
+            const total = filteredPatients.length;
+            const enrolled = filteredPatients.filter(p => p.enrolled).length;
+            const scheduled = filteredPatients.filter(p => p.scheduled).length;
+            const avgHealth = Math.round(filteredPatients.reduce((sum, p) => sum + p.health, 0) / total);
+            const avgPoints = Math.round(filteredPatients.reduce((sum, p) => sum + p.points, 0) / total);
+            const avgStreak = Math.round(filteredPatients.reduce((sum, p) => sum + p.streak, 0) / total);
+            const enrollmentRate = Math.round((enrolled / total) * 100);
+
+            document.getElementById('totalPatients').textContent = total;
+            document.getElementById('enrollmentRate').textContent = enrollmentRate + '%';
+            document.getElementById('scheduledAppointments').textContent = scheduled;
+            document.getElementById('avgHealth').textContent = avgHealth + '%';
+            document.getElementById('avgPoints').textContent = avgPoints.toLocaleString();
+            document.getElementById('avgStreak').textContent = avgStreak;
+        }
+
+        // ========================================
+        // RENDER TABLE
+        // ========================================
+        function renderTable() {
+            const tbody = document.getElementById('patientsTableBody');
+
+            if (filteredPatients.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="loading">No se encontraron pacientes con los filtros aplicados</td></tr>';
+                document.getElementById('tableInfo').textContent = 'Mostrando 0 de ' + allPatients.length + ' pacientes';
+                return;
+            }
+
+            tbody.innerHTML = filteredPatients.map(patient => {
+                const healthClass = patient.health >= 80 ? 'excellent' : patient.health >= 70 ? 'good' : patient.health >= 60 ? 'fair' : 'poor';
+
+                return `
+                    <tr>
+                        <td><strong>${patient.dni}</strong></td>
+                        <td>${patient.name}</td>
+                        <td>${patient.age} años</td>
+                        <td>${CITY_NAMES[patient.city]}</td>
+                        <td>${PROGRAM_NAMES[patient.program]}</td>
+                        <td>
+                            <span class="badge ${patient.enrolled ? 'enrolled' : 'not-enrolled'}">${patient.enrolled ? '✓ Inscrito' : '○ No inscrito'}</span>
+                            ${patient.scheduled ? '<span class="badge scheduled">📅 Agendado</span>' : ''}
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="health-bar-container">
+                                    <div class="health-bar ${healthClass}" style="width: ${patient.health}%"></div>
+                                </div>
+                                <span><strong>${patient.health}%</strong></span>
+                            </div>
+                        </td>
+                        <td><strong>${patient.points.toLocaleString()}</strong></td>
+                        <td>${patient.streak} días 🔥</td>
+                        <td>${patient.lastActivity}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('tableInfo').textContent = `Mostrando ${filteredPatients.length} de ${allPatients.length} pacientes`;
+        }
+
+        // ========================================
+        // CHARTS
+        // ========================================
+        let programsChart, healthByAgeChart, citiesChart, timeSlotsChart;
+
+        function createCharts() {
+            // Programs Chart
+            const programCounts = {};
+            filteredPatients.forEach(p => {
+                programCounts[p.program] = (programCounts[p.program] || 0) + 1;
+            });
+
+            const programsCtx = document.getElementById('programsChart').getContext('2d');
+            programsChart = new Chart(programsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(programCounts).map(k => PROGRAM_NAMES[k]),
+                    datasets: [{
+                        data: Object.values(programCounts),
+                        backgroundColor: [
+                            '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
+                            '#8B5CF6', '#EC4899', '#6366F1'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Health by Age Chart
+            const ageGroups = {
+                '0-18': [],
+                '19-35': [],
+                '36-50': [],
+                '51-65': [],
+                '66+': []
+            };
+
+            filteredPatients.forEach(p => {
+                if (p.age <= 18) ageGroups['0-18'].push(p.health);
+                else if (p.age <= 35) ageGroups['19-35'].push(p.health);
+                else if (p.age <= 50) ageGroups['36-50'].push(p.health);
+                else if (p.age <= 65) ageGroups['51-65'].push(p.health);
+                else ageGroups['66+'].push(p.health);
+            });
+
+            const avgHealthByAge = Object.keys(ageGroups).map(key => {
+                const ages = ageGroups[key];
+                return ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
+            });
+
+            const healthByAgeCtx = document.getElementById('healthByAgeChart').getContext('2d');
+            healthByAgeChart = new Chart(healthByAgeCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(ageGroups),
+                    datasets: [{
+                        label: 'Salud Promedio (%)',
+                        data: avgHealthByAge,
+                        backgroundColor: '#3B82F6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Cities Chart
+            const cityCounts = {};
+            filteredPatients.forEach(p => {
+                cityCounts[p.city] = (cityCounts[p.city] || 0) + 1;
+            });
+
+            const citiesCtx = document.getElementById('citiesChart').getContext('2d');
+            citiesChart = new Chart(citiesCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(cityCounts).map(k => CITY_NAMES[k]),
+                    datasets: [{
+                        label: 'Pacientes',
+                        data: Object.values(cityCounts),
+                        backgroundColor: '#10B981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Time Slots Chart
+            const timeSlotCounts = {};
+            filteredPatients.filter(p => p.timeSlot).forEach(p => {
+                timeSlotCounts[p.timeSlot] = (timeSlotCounts[p.timeSlot] || 0) + 1;
+            });
+
+            const timeSlotsCtx = document.getElementById('timeSlotsChart').getContext('2d');
+            timeSlotsChart = new Chart(timeSlotsCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(timeSlotCounts),
+                    datasets: [{
+                        label: 'Pacientes',
+                        data: Object.values(timeSlotCounts),
+                        backgroundColor: '#F59E0B'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (programsChart) programsChart.destroy();
+            if (healthByAgeChart) healthByAgeChart.destroy();
+            if (citiesChart) citiesChart.destroy();
+            if (timeSlotsChart) timeSlotsChart.destroy();
+            createCharts();
+        }
+
+        // ========================================
+        // FILTERS
+        // ========================================
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const programFilter = document.getElementById('programFilter').value;
+            const cityFilter = document.getElementById('cityFilter').value;
+
+            filteredPatients = allPatients.filter(patient => {
+                const matchesSearch = !searchTerm ||
+                    patient.name.toLowerCase().includes(searchTerm) ||
+                    patient.dni.includes(searchTerm) ||
+                    CITY_NAMES[patient.city].toLowerCase().includes(searchTerm);
+
+                const matchesProgram = !programFilter || patient.program === programFilter;
+                const matchesCity = !cityFilter || patient.city === cityFilter;
+
+                return matchesSearch && matchesProgram && matchesCity;
+            });
+
+            calculateKPIs();
+            renderTable();
+            updateCharts();
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('programFilter').value = '';
+            document.getElementById('cityFilter').value = '';
+
+            filteredPatients = [...allPatients];
+            calculateKPIs();
+            renderTable();
+            updateCharts();
+        }
+
+        // ========================================
+        // EXPORT TO CSV
+        // ========================================
+        function exportToCSV() {
+            const headers = ['DNI', 'Nombre', 'Edad', 'Ciudad', 'Programa', 'Inscrito', 'Agendado', 'Salud (%)', 'Puntos', 'Racha', 'Última Actividad', 'Clínica', 'Horario'];
+
+            const rows = filteredPatients.map(p => [
+                p.dni,
+                p.name,
+                p.age,
+                CITY_NAMES[p.city],
+                PROGRAM_NAMES[p.program],
+                p.enrolled ? 'Sí' : 'No',
+                p.scheduled ? 'Sí' : 'No',
+                p.health,
+                p.points,
+                p.streak,
+                p.lastActivity,
+                p.clinic || 'N/A',
+                p.timeSlot || 'N/A'
+            ]);
+
+            let csvContent = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csvContent += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'pacientes_gemelo_digital_' + new Date().toISOString().split('T')[0] + '.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ========================================
+        // INITIALIZE
+        // ========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateKPIs();
+            renderTable();
+            createCharts();
+
+            // Real-time search
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+        });
+    </script>
+
+</body>
+</html>

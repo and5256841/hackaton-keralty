@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Gestión Digital - Asegurador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.8em;
+        }
+
+        .navbar p {
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .metric-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .metric-subtext {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .risk-distribution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .risk-item {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .risk-healthy {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+        }
+
+        .risk-susceptible {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+        }
+
+        .risk-stable {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+        }
+
+        .risk-high {
+            background: linear-gradient(135deg, #d6d8db 0%, #c6c8ca 100%);
+            color: #383d41;
+        }
+
+        .risk-count {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .risk-label {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .program-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .program-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .program-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .program-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .progress-bar-container {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .financial-impact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .impact-box {
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .impact-negative {
+            background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+            border: 2px solid #fcc;
+        }
+
+        .impact-positive {
+            background: linear-gradient(135deg, #dfd 0%, #cfc 100%);
+            border: 2px solid #beb;
+        }
+
+        .impact-label {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .impact-amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .impact-negative .impact-amount {
+            color: #c82333;
+        }
+
+        .impact-positive .impact-amount {
+            color: #28a745;
+        }
+
+        .refresh-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .refresh-button:hover {
+            transform: scale(1.05);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🏢 Plataforma de Gestión Digital</h1>
+        <p>Vista Poblacional - Asegurador de Salud Prepagada</p>
+    </nav>
+
+    <div class="container">
+        <button class="refresh-button" onclick="loadDashboard()">🔄 Actualizar Datos</button>
+
+        <div id="loading" class="loading" style="display: none;">
+            ⏳ Cargando datos poblacionales...
+        </div>
+
+        <div id="dashboardContent" style="display: none;">
+            <!-- Métricas Principales -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">👥</div>
+                    <div class="metric-label">Total Pacientes</div>
+                    <div class="metric-value" id="totalPatients">-</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">📈</div>
+                    <div class="metric-label">Tasa de Inscripción</div>
+                    <div class="metric-value" id="enrollmentRate">-</div>
+                    <div class="metric-subtext">en programas de salud</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">📧</div>
+                    <div class="metric-label">Tasa de Apertura</div>
+                    <div class="metric-value" id="openRate">-</div>
+                    <div class="metric-subtext">emails promedio</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">⚠️</div>
+                    <div class="metric-label">Riesgo de Complicación</div>
+                    <div class="metric-value" id="avgComplication">-</div>
+                    <div class="metric-subtext">promedio poblacional</div>
+                </div>
+            </div>
+
+            <!-- Distribución de Riesgo -->
+            <div class="section">
+                <h2 class="section-title">📊 Distribución de Riesgo Poblacional</h2>
+                <div class="risk-distribution">
+                    <div class="risk-item risk-healthy">
+                        <div class="risk-label">Saludable</div>
+                        <div class="risk-count" id="healthyCount">-</div>
+                        <div class="metric-subtext">pacientes</div>
+                    </div>
+                    <div class="risk-item risk-susceptible">
+                        <div class="risk-label">Susceptible</div>
+                        <div class="risk-count" id="susceptibleCount">-</div>
+                        <div class="metric-subtext">pacientes</div>
+                    </div>
+                    <div class="risk-item risk-stable">
+                        <div class="risk-label">Condición Estable</div>
+                        <div class="risk-count" id="stableCount">-</div>
+                        <div class="metric-subtext">pacientes</div>
+                    </div>
+                    <div class="risk-item risk-high">
+                        <div class="risk-label">Alta Complejidad</div>
+                        <div class="risk-count" id="highCount">-</div>
+                        <div class="metric-subtext">pacientes</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impacto Financiero -->
+            <div class="section">
+                <h2 class="section-title">💰 Impacto Financiero Estimado (90 días)</h2>
+                <div class="financial-impact">
+                    <div class="impact-box impact-negative">
+                        <div class="impact-label">Costo Estimado sin Intervención</div>
+                        <div class="impact-amount" id="totalCost">$0</div>
+                        <div class="metric-subtext">COP en complicaciones potenciales</div>
+                    </div>
+                    <div class="impact-box impact-positive">
+                        <div class="impact-label">Ahorro Potencial con Programas</div>
+                        <div class="impact-amount" id="savings">$0</div>
+                        <div class="metric-subtext">COP si aumentamos cobertura</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Distribución por Programa -->
+            <div class="section">
+                <h2 class="section-title">🎯 Distribución por Programa</h2>
+                <table class="program-table">
+                    <thead>
+                        <tr>
+                            <th>Programa</th>
+                            <th>Pacientes Candidatos</th>
+                            <th>% del Total</th>
+                            <th>Distribución</th>
+                        </tr>
+                    </thead>
+                    <tbody id="programTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        async function loadDashboard() {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('dashboardContent');
+
+            loading.style.display = 'block';
+            content.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}/analytics/population-summary`);
+                const data = await response.json();
+
+                renderDashboard(data);
+
+                content.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Error al cargar el dashboard. Asegúrate de que el backend esté corriendo.');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function renderDashboard(data) {
+            // Main metrics
+            document.getElementById('totalPatients').textContent = data.total_patients.toLocaleString();
+            document.getElementById('enrollmentRate').textContent = `${data.enrollment_rate}%`;
+            document.getElementById('openRate').textContent = `${(data.avg_email_open_rate * 100).toFixed(1)}%`;
+            document.getElementById('avgComplication').textContent = `${(data.avg_complication_probability * 100).toFixed(1)}%`;
+
+            // Risk distribution
+            document.getElementById('healthyCount').textContent = data.healthy_count;
+            document.getElementById('susceptibleCount').textContent = data.susceptible_count;
+            document.getElementById('stableCount').textContent = data.stable_condition_count;
+            document.getElementById('highCount').textContent = data.high_complexity_count;
+
+            // Financial impact
+            document.getElementById('totalCost').textContent = formatCurrency(data.total_estimated_cost_90d);
+            document.getElementById('savings').textContent = formatCurrency(data.potential_cost_savings);
+
+            // Program distribution
+            renderProgramTable(data.program_distribution, data.total_patients);
+        }
+
+        function renderProgramTable(programDist, totalPatients) {
+            const tbody = document.getElementById('programTableBody');
+
+            const programNames = {
+                'HYPERTENSION': 'Hipertensión',
+                'OBESITY': 'Obesidad y Nutrición',
+                'PRENATAL': 'Prenatal',
+                'DIABETES': 'Diabetes',
+                'CARDIOVASCULAR': 'Cardiovascular'
+            };
+
+            const rows = Object.entries(programDist).map(([code, count]) => {
+                const percentage = (count / totalPatients * 100).toFixed(1);
+                return `
+                    <tr>
+                        <td><strong>${programNames[code] || code}</strong></td>
+                        <td>${count.toLocaleString()} pacientes</td>
+                        <td>${percentage}%</td>
+                        <td>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: ${percentage}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = rows.join('');
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu Yo del Futuro - Plataforma de Salud Inteligente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #25D366;
+            --primary-turquoise: #128C7E;
+            --dark-turquoise: #075E54;
+            --light-bg: #ECE5DD;
+            --white: #FFFFFF;
+            --text-dark: #303030;
+            --text-light: #666666;
+            --risk-low: #28a745;
+            --risk-medium: #ffc107;
+            --risk-high: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-turquoise) 0%, var(--dark-turquoise) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* CHAT VIEW */
+        #chat-view {
+            width: 100%;
+            max-width: 480px;
+            height: 95vh;
+            background: var(--light-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: var(--primary-turquoise);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar-container {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+        }
+
+        .avatar-container.animated {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(37, 211, 102, 0.5); }
+        }
+
+        .chat-info h2 {
+            font-size: 1.1em;
+            margin-bottom: 3px;
+        }
+
+        .chat-info p {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--light-bg);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 8px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .message.user .message-bubble {
+            background: #DCF8C6;
+            border-bottom-right-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .message.dramatic .message-bubble {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: white;
+            font-weight: 500;
+        }
+
+        .message-time {
+            font-size: 0.7em;
+            color: #999;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 8px;
+            width: 60px;
+            margin-bottom: 15px;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background: #999;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .input-area {
+            padding: 15px;
+            background: #F0F0F0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .scan-button {
+            background: var(--primary-turquoise);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        #sendButton {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        #sendButton:hover {
+            transform: scale(1.1);
+        }
+
+        /* DIGITAL TWIN VIEW */
+        #digital-twin-view {
+            display: none;
+            width: 100%;
+            max-width: 1000px;
+            height: 95vh;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .twin-header {
+            background: linear-gradient(135deg, var(--primary-turquoise) 0%, var(--primary-green) 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .patient-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .twin-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #F9F9F9;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-turquoise);
+        }
+
+        .section h2 {
+            color: var(--primary-turquoise);
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .info-label {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .risk-low { background: #D4EDDA; color: #155724; }
+        .risk-medium { background: #FFF3CD; color: #856404; }
+        .risk-high { background: #F8D7DA; color: #721C24; }
+
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .program-card {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #E0E0E0;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .program-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .program-card.recommended {
+            border-color: var(--primary-green);
+            background: linear-gradient(135deg, #F0FFF4 0%, #E8F5E9 100%);
+        }
+
+        .program-card.urgent {
+            border-color: #FF6B6B;
+            background: linear-gradient(135deg, #FFF5F5 0%, #FFE5E5 100%);
+        }
+
+        .program-priority {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-green);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .program-priority.urgent {
+            background: #FF6B6B;
+        }
+
+        .program-title {
+            font-weight: 600;
+            color: var(--primary-turquoise);
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .program-desc {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .program-location {
+            font-size: 0.8em;
+            color: var(--primary-turquoise);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .schedule-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .schedule-btn:hover {
+            background: var(--primary-turquoise);
+        }
+
+        .cta-button {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            background: var(--primary-turquoise);
+            transform: scale(1.05);
+        }
+
+        .back-button {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        /* INSURER VIEW */
+        #insurer-view {
+            display: none;
+            width: 100%;
+            max-width: 1400px;
+            height: 95vh;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .insurer-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .download-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .metric-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--primary-turquoise);
+        }
+
+        .metric-label {
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* MODAL STYLES */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--primary-turquoise);
+            padding: 40px;
+            border-radius: 10px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #F0FFF4;
+            border-color: var(--primary-green);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- CHAT VIEW -->
+    <div id="chat-view">
+        <div class="chat-header">
+            <div class="avatar-container animated">
+                <span id="chatAvatar">🔮</span>
+            </div>
+            <div class="chat-info">
+                <h2>Tu Yo del Futuro</h2>
+                <p id="chatStatus">Escribiendo...</p>
+            </div>
+        </div>
+
+        <div class="messages-area" id="messagesArea"></div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span><span></span><span></span>
+        </div>
+
+        <div class="input-area">
+            <button class="scan-button" onclick="openScanModal()" title="Escanear Historia Clínica">📄</button>
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje..." />
+            <button id="sendButton">➤</button>
+        </div>
+    </div>
+
+    <!-- DIGITAL TWIN VIEW -->
+    <div id="digital-twin-view">
+        <div class="twin-header">
+            <div class="patient-avatar" id="patientAvatar">👤</div>
+            <div>
+                <h1>🧬 Tu Gemelo Digital de Salud</h1>
+                <p id="patientName">Cargando información...</p>
+            </div>
+        </div>
+
+        <div class="twin-content" id="twinContent"></div>
+    </div>
+
+    <!-- INSURER VIEW -->
+    <div id="insurer-view">
+        <div class="insurer-header">
+            <div>
+                <h1>📊 Panel de Gestión - Asegurador</h1>
+                <p>Monitoreo poblacional en tiempo real</p>
+            </div>
+            <button class="download-btn" onclick="downloadData()">
+                📥 Descargar Excel
+            </button>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value" id="totalPatients">0</div>
+                <div class="metric-label">Pacientes Enrolados</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="activeChats">0</div>
+                <div class="metric-label">Conversaciones Activas</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="programsAssigned">0</div>
+                <div class="metric-label">Programas Asignados</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="conversionRate">0%</div>
+                <div class="metric-label">Tasa de Conversión</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="highRiskPatients">0</div>
+                <div class="metric-label">Pacientes Alto Riesgo</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="scheduledAppointments">0</div>
+                <div class="metric-label">Citas Agendadas</div>
+            </div>
+        </div>
+
+        <div style="padding: 0 30px 30px;">
+            <button class="back-button" onclick="showView('chat')">Volver al Chat</button>
+            <button class="cta-button" onclick="downloadData()">📥 Descargar Reporte Completo</button>
+        </div>
+    </div>
+
+    <!-- MODAL: SCAN MEDICAL RECORD -->
+    <div id="scanModal" class="modal">
+        <div class="modal-content">
+            <h2>📄 Escanear Historia Clínica</h2>
+            <p>Sube tu historia clínica para análisis personalizado</p>
+
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <p style="font-size: 3em;">📤</p>
+                <p>Haz clic para subir tu historia clínica</p>
+                <p style="font-size: 0.85em; color: #999; margin-top: 10px;">Formatos: PDF, JPG, PNG</p>
+            </div>
+
+            <input type="file" id="fileInput" style="display: none;" accept=".pdf,.jpg,.jpeg,.png" onchange="processFile(this.files[0])">
+
+            <button class="cta-button" onclick="closeModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        // IMPORTANT: Replace with your own OpenAI API key
+        // Get your key at: https://platform.openai.com/api-keys
+        const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
+
+        const PROGRAMS_BY_CITY = {
+            'Bogotá': ['Hospital San Ignacio', 'Clínica Shaio', 'Fundación Santa Fe'],
+            'Medellín': ['Hospital Pablo Tobón Uribe', 'Clínica Las Américas'],
+            'Cali': ['Clínica Imbanaco', 'Centro Médico Valle'],
+            'Barranquilla': ['Clínica Portoazul', 'Hospital Universidad del Norte']
+        };
+
+        const ALL_PROGRAMS = [
+            { name: 'Hipertensión', urgent: true, category: 'cardiovascular' },
+            { name: 'Diabetes', urgent: true, category: 'metabolic' },
+            { name: 'EPOC', urgent: true, category: 'respiratory' },
+            { name: 'Obesidad Adultos', urgent: false, category: 'metabolic' },
+            { name: 'Falla Cardíaca', urgent: true, category: 'cardiovascular' },
+            { name: 'Asma', urgent: false, category: 'respiratory' },
+            { name: 'Obesidad Pediátrica', urgent: false, category: 'metabolic' },
+            { name: 'Complejo Ambulatorio', urgent: false, category: 'general' },
+            { name: 'Acompañamiento Médico', urgent: false, category: 'general' },
+            { name: 'Alta Complejidad', urgent: true, category: 'specialized' },
+            { name: 'Adulto Mayor', urgent: false, category: 'geriatric' },
+            { name: 'Cuidado Paliativo', urgent: true, category: 'specialized' },
+            { name: 'Control Prenatal', urgent: false, category: 'maternal' },
+            { name: 'Canguro', urgent: false, category: 'maternal' },
+            { name: 'Lactancia Materna', urgent: false, category: 'maternal' },
+            { name: 'Senil', urgent: false, category: 'geriatric' },
+            { name: 'Alma Joven', urgent: false, category: 'mental' },
+            { name: 'Balance', urgent: false, category: 'rehabilitation' },
+            { name: 'Trastorno Conducta Alimentaria', urgent: false, category: 'mental' },
+            { name: 'Rehabilitación', urgent: false, category: 'rehabilitation' },
+            { name: 'Neurocognitivo', urgent: false, category: 'neurological' },
+            { name: 'Caracterización de Riesgo', urgent: false, category: 'preventive' },
+            { name: 'Soporte Oncológico', urgent: true, category: 'oncological' },
+            { name: 'Telemonitoreo', urgent: false, category: 'technology' },
+            { name: 'Gestión Farmacéutica', urgent: false, category: 'pharmaceutical' },
+            { name: 'Conciliación Terapéutica', urgent: false, category: 'pharmaceutical' },
+            { name: 'Manejo del Sueño', urgent: false, category: 'lifestyle' },
+            { name: 'Pie Diabético', urgent: true, category: 'metabolic' },
+            { name: 'Dolor Lumbar', urgent: false, category: 'pain' },
+            { name: 'Fibromialgia', urgent: false, category: 'pain' },
+            { name: 'Patología Oncológica Mama', urgent: true, category: 'oncological' },
+            { name: 'Hipotiroidismo', urgent: false, category: 'endocrine' },
+            { name: 'Liraglutide', urgent: false, category: 'metabolic' },
+            { name: 'Dislipidemia', urgent: false, category: 'metabolic' },
+            { name: 'Esquizofrenia', urgent: true, category: 'mental' },
+            { name: 'Hospitalización', urgent: true, category: 'emergency' }
+        ];
+
+        let conversationHistory = [];
+        let patientData = {
+            name: '',
+            city: 'Bogotá',
+            riskLevel: 'medium',
+            conditions: [],
+            recommendedPrograms: [],
+            enrolled: false,
+            age: 0,
+            avatar: '👤'
+        };
+
+        // INITIALIZE
+        window.onload = function() {
+            loadRandomPatient();
+            startConversation();
+        };
+
+        function loadRandomPatient() {
+            // Simulate loading from 300 patients database
+            const names = ['María García', 'Juan López', 'Ana Martínez', 'Carlos Rodríguez', 'Laura Pérez'];
+            const cities = ['Bogotá', 'Medellín', 'Cali', 'Barranquilla'];
+            const risks = ['low', 'medium', 'high'];
+            const avatars = ['👨', '👩', '👨‍⚕️', '👩‍⚕️', '🧑'];
+
+            patientData.name = names[Math.floor(Math.random() * names.length)];
+            patientData.city = cities[Math.floor(Math.random() * cities.length)];
+            patientData.riskLevel = risks[Math.floor(Math.random() * risks.length)];
+            patientData.age = 25 + Math.floor(Math.random() * 50);
+            patientData.avatar = avatars[Math.floor(Math.random() * avatars.length)];
+
+            if (patientData.riskLevel === 'high') {
+                patientData.conditions = ['Hipertensión', 'Diabetes', 'Obesidad'];
+            } else if (patientData.riskLevel === 'medium') {
+                patientData.conditions = ['Prediabetes', 'Sobrepeso'];
+            } else {
+                patientData.conditions = [];
+            }
+        }
+
+        function startConversation() {
+            const greeting = getDramaticGreeting();
+            addMessage('assistant', greeting, true);
+        }
+
+        function getDramaticGreeting() {
+            if (patientData.riskLevel === 'high') {
+                return `${patientData.name}, soy TÚ, pero del futuro. Y necesito que me escuches: si no actúas AHORA, las cosas van a ponerse muy difíciles. A los ${patientData.age + 10} años, tu cuerpo ya no aguanta más. Tus hijos te ven sufrir. ¿De verdad quieres eso?`;
+            } else if (patientData.riskLevel === 'medium') {
+                return `Hola ${patientData.name}. Soy tu yo del futuro y vine a advertirte: estás en un punto crítico. Todavía puedes evitar lo que me pasó a mí. Pero el tiempo corre. ¿Hablamos?`;
+            } else {
+                return `${patientData.name}, soy tu yo del futuro y tengo buenas noticias: estás en buen camino. Pero hay cosas que podemos mejorar AHORA para que tu futuro sea aún mejor. ¿Me das 2 minutos?`;
+            }
+        }
+
+        // SEND MESSAGE
+        document.getElementById('sendButton').onclick = sendMessage;
+        document.getElementById('messageInput').onkeypress = function(e) {
+            if (e.key === 'Enter') sendMessage();
+        };
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('user', message);
+            input.value = '';
+            document.getElementById('sendButton').disabled = true;
+            document.getElementById('typingIndicator').classList.add('show');
+            document.getElementById('chatStatus').textContent = 'Escribiendo...';
+
+            conversationHistory.push({ role: 'user', content: message });
+
+            try {
+                const response = await callOpenAI(message);
+                document.getElementById('typingIndicator').classList.remove('show');
+                document.getElementById('chatStatus').textContent = 'En línea';
+
+                const isDramatic = patientData.riskLevel === 'high' && Math.random() > 0.5;
+                addMessage('assistant', response, isDramatic);
+
+                if (message.toLowerCase().includes('sí') || message.toLowerCase().includes('si') ||
+                    message.toLowerCase().includes('acepto') || message.toLowerCase().includes('claro')) {
+                    setTimeout(() => {
+                        addMessage('assistant', `¡Excelente decisión ${patientData.name}! 🎉 Tu yo del futuro está orgulloso. He preparado tu perfil completo de salud. ¿Listo para verlo?`, false);
+                        setTimeout(showTransitionButton, 1500);
+                    }, 2000);
+                }
+
+            } catch (error) {
+                document.getElementById('typingIndicator').classList.remove('show');
+                addMessage('assistant', 'Disculpa, hubo un error. ¿Puedes repetir?');
+                console.error(error);
+            }
+
+            document.getElementById('sendButton').disabled = false;
+        }
+
+        async function callOpenAI(userMessage) {
+            const riskContext = {
+                high: `El paciente tiene ALTO RIESGO. Condiciones: ${patientData.conditions.join(', ')}. Sé MUY dramático pero realista. Habla de consecuencias graves: hospitalizaciones, dependencia, impacto en familia.`,
+                medium: `El paciente tiene RIESGO MODERADO. Está en punto crítico. Sé persuasivo pero esperanzador. Todavía puede evitar complicaciones.`,
+                low: `El paciente está SALUDABLE. Sé positivo y preventivo. Enfócate en mantener la salud, no en asustar.`
+            };
+
+            const systemPrompt = `Eres el "yo del futuro" de ${patientData.name}, ${patientData.age} años, de ${patientData.city}.
+
+NIVEL DE RIESGO: ${patientData.riskLevel.toUpperCase()}
+${riskContext[patientData.riskLevel]}
+
+PERSONALIDAD:
+- Hablas en primera persona como la misma persona del futuro
+- Eres EXTREMADAMENTE persuasivo y emocional
+- Usas ejemplos específicos: "Recuerda cuando mamá se enfermó? Lo mismo te va a pasar"
+- Mencionas familia, hijos, sueños
+- Creas urgencia: "AHORA es el momento, no mañana"
+
+ESTRATEGIA POR MENSAJE:
+1. Conecta con emociones profundas
+2. Usa ejemplos CONCRETOS de consecuencias (no genéricos)
+3. Ofrece esperanza con los programas
+4. Cierra con pregunta directa
+
+REGLAS:
+- Máximo 3 oraciones por respuesta
+- Usa lenguaje coloquial colombiano
+- NO des diagnósticos médicos
+- SÍ sé dramático cuando el riesgo es alto
+- Menciona los programas disponibles en ${patientData.city}
+
+Responde como si tu vida dependiera de convencer a tu yo del pasado.`;
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...conversationHistory
+            ];
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4',
+                    messages: messages,
+                    temperature: 0.9,
+                    max_tokens: 200
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+
+            const assistantMessage = data.choices[0].message.content;
+            conversationHistory.push({ role: 'assistant', content: assistantMessage });
+
+            return assistantMessage;
+        }
+
+        function addMessage(role, text, dramatic = false) {
+            const messagesArea = document.getElementById('messagesArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}` + (dramatic ? ' dramatic' : '');
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = text;
+
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            time.textContent = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+
+            bubble.appendChild(time);
+            messageDiv.appendChild(bubble);
+            messagesArea.appendChild(messageDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function showTransitionButton() {
+            const messagesArea = document.getElementById('messagesArea');
+            const buttonDiv = document.createElement('div');
+            buttonDiv.style.textAlign = 'center';
+            buttonDiv.style.padding = '20px';
+            buttonDiv.innerHTML = `
+                <button class="cta-button" onclick="showDigitalTwin()">
+                    Ver Mi Gemelo Digital 🧬
+                </button>
+            `;
+            messagesArea.appendChild(buttonDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function showDigitalTwin() {
+            patientData.enrolled = true;
+            patientData.recommendedPrograms = ALL_PROGRAMS
+                .filter(p => p.urgent || Math.random() > 0.7)
+                .slice(0, 6)
+                .map(p => p.name);
+
+            showView('twin');
+            renderDigitalTwin();
+            updateInsurerMetrics();
+        }
+
+        function renderDigitalTwin() {
+            document.getElementById('patientAvatar').textContent = patientData.avatar;
+            document.getElementById('patientName').textContent = `${patientData.name} - ${patientData.age} años - ${patientData.city}`;
+
+            const riskClass = `risk-${patientData.riskLevel}`;
+            const riskLabel = {
+                low: 'Riesgo Bajo',
+                medium: 'Riesgo Moderado',
+                high: 'Riesgo Alto'
+            }[patientData.riskLevel];
+
+            const content = document.getElementById('twinContent');
+            content.innerHTML = `
+                <div class="section">
+                    <h2>📋 Tu Perfil de Salud</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Nivel de Riesgo</div>
+                            <div class="info-value">
+                                <span class="risk-badge ${riskClass}">${riskLabel}</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Ciudad</div>
+                            <div class="info-value">${patientData.city}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Condiciones</div>
+                            <div class="info-value">${patientData.conditions.length || 'Ninguna'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Programas Recomendados</div>
+                            <div class="info-value">${patientData.recommendedPrograms.length}</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${patientData.conditions.length > 0 ? `
+                <div class="section">
+                    <h2>⚠️ Condiciones Detectadas</h2>
+                    <div class="programs-grid">
+                        ${patientData.conditions.map(c => `
+                            <div class="program-card urgent">
+                                <div class="program-priority urgent">URGENTE</div>
+                                <div class="program-title">${c}</div>
+                                <div class="program-desc">Requiere atención inmediata</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="section">
+                    <h2>✨ Programas Recomendados - ${patientData.city}</h2>
+                    <div class="programs-grid">
+                        ${ALL_PROGRAMS.filter(p => patientData.recommendedPrograms.includes(p.name)).map(p => {
+                            const locations = PROGRAMS_BY_CITY[patientData.city] || ['Centro Médico Principal'];
+                            const location = locations[Math.floor(Math.random() * locations.length)];
+                            return `
+                                <div class="program-card ${p.urgent ? 'urgent' : 'recommended'}">
+                                    <div class="program-priority ${p.urgent ? 'urgent' : ''}">${p.urgent ? 'PRIORITARIO' : 'RECOMENDADO'}</div>
+                                    <div class="program-title">${p.name}</div>
+                                    <div class="program-desc">Programa integral de seguimiento</div>
+                                    <div class="program-location">📍 ${location}</div>
+                                    <button class="schedule-btn" onclick="scheduleAppointment('${p.name}', '${location}')">
+                                        📅 Agendar Cita
+                                    </button>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>📚 Otros Programas Disponibles en ${patientData.city}</h2>
+                    <div class="programs-grid">
+                        ${ALL_PROGRAMS.filter(p => !patientData.recommendedPrograms.includes(p.name)).slice(0, 12).map(p => {
+                            const locations = PROGRAMS_BY_CITY[patientData.city] || ['Centro Médico Principal'];
+                            const location = locations[Math.floor(Math.random() * locations.length)];
+                            return `
+                                <div class="program-card">
+                                    <div class="program-title">${p.name}</div>
+                                    <div class="program-desc">Disponible cuando lo necesites</div>
+                                    <div class="program-location">📍 ${location}</div>
+                                    <button class="schedule-btn" onclick="scheduleAppointment('${p.name}', '${location}')">
+                                        📅 Agendar
+                                    </button>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="cta-button" onclick="enrollInAllPrograms()">
+                        ✅ Inscribirme en Programas Prioritarios
+                    </button>
+                    <button class="back-button" onclick="showView('chat')">Volver al Chat</button>
+                    <button class="back-button" onclick="showView('insurer')" style="background: var(--primary-turquoise);">Panel Asegurador</button>
+                </div>
+            `;
+        }
+
+        function scheduleAppointment(program, location) {
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+            const times = ['8:00 AM', '10:00 AM', '2:00 PM', '4:00 PM'];
+            const day = days[Math.floor(Math.random() * days.length)];
+            const time = times[Math.floor(Math.random() * times.length)];
+
+            alert(`✅ ¡Cita Agendada!\n\nPrograma: ${program}\nLugar: ${location}\nFecha: ${day} próximo\nHora: ${time}\n\nRecibirás recordatorios por WhatsApp y llamada automática 24 horas antes.`);
+
+            updateInsurerMetrics();
+        }
+
+        function enrollInAllPrograms() {
+            alert(`🎉 ¡Felicitaciones ${patientData.name}!\n\nTe has inscrito en ${patientData.recommendedPrograms.length} programas prioritarios.\n\n` +
+                  `Sistema de Seguimiento Activado:\n` +
+                  `• Recordatorios automáticos por WhatsApp\n` +
+                  `• Llamadas personalizadas cada semana\n` +
+                  `• Mensaje especial en tu cumpleaños\n` +
+                  `• Monitoreo continuo de tu salud\n` +
+                  `• Geolocalización de centros cercanos\n\n` +
+                  `Tu yo del futuro está ORGULLOSO de ti! 💚`);
+
+            updateInsurerMetrics();
+        }
+
+        function updateInsurerMetrics() {
+            document.getElementById('totalPatients').textContent = patientData.enrolled ? '1' : '0';
+            document.getElementById('activeChats').textContent = conversationHistory.length > 0 ? '1' : '0';
+            document.getElementById('programsAssigned').textContent = patientData.recommendedPrograms.length;
+            document.getElementById('conversionRate').textContent = patientData.enrolled ? '100%' : '0%';
+            document.getElementById('highRiskPatients').textContent = patientData.riskLevel === 'high' ? '1' : '0';
+            document.getElementById('scheduledAppointments').textContent = patientData.enrolled ? patientData.recommendedPrograms.length : '0';
+        }
+
+        function showView(view) {
+            document.getElementById('chat-view').style.display = 'none';
+            document.getElementById('digital-twin-view').style.display = 'none';
+            document.getElementById('insurer-view').style.display = 'none';
+
+            if (view === 'chat') {
+                document.getElementById('chat-view').style.display = 'flex';
+            } else if (view === 'twin') {
+                document.getElementById('digital-twin-view').style.display = 'flex';
+            } else if (view === 'insurer') {
+                document.getElementById('insurer-view').style.display = 'flex';
+                updateInsurerMetrics();
+            }
+        }
+
+        // SCAN MODAL
+        function openScanModal() {
+            document.getElementById('scanModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('scanModal').classList.remove('show');
+        }
+
+        async function processFile(file) {
+            if (!file) return;
+
+            closeModal();
+
+            // Simulate file processing
+            addMessage('assistant', '📄 Estoy analizando tu historia clínica... Un momento por favor.', false);
+
+            setTimeout(() => {
+                const conditions = ['Hipertensión', 'Prediabetes', 'Sobrepeso'];
+                patientData.conditions = conditions;
+                patientData.riskLevel = 'medium';
+
+                addMessage('assistant',
+                    `He analizado tu historia clínica. Encontré: ${conditions.join(', ')}. ` +
+                    `${patientData.name}, esto es serio. Necesitamos actuar YA. ¿Estás listo/a para cambiar tu futuro?`,
+                    true
+                );
+            }, 3000);
+        }
+
+        // DOWNLOAD DATA
+        function downloadData() {
+            const csvContent = `Nombre,Edad,Ciudad,Nivel de Riesgo,Condiciones,Programas Recomendados,Enrolado
+${patientData.name},${patientData.age},${patientData.city},${patientData.riskLevel},"${patientData.conditions.join('; ')}","${patientData.recommendedPrograms.join('; ')}",${patientData.enrolled ? 'Sí' : 'No'}`;
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `reporte_pacientes_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            alert('📥 Descargando reporte en formato CSV/Excel');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Familiar de Salud - Gemelo Digital Tamagotchi</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #25D366;
+            --primary-turquoise: #128C7E;
+            --dark-turquoise: #075E54;
+            --light-bg: #ECE5DD;
+            --white: #FFFFFF;
+            --text-dark: #303030;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-turquoise) 0%, var(--dark-turquoise) 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* ============ CONSENT SCREEN ============ */
+        .consent-screen {
+            background: white;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .consent-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .consent-header h1 {
+            color: var(--primary-turquoise);
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .consent-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .consent-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary-turquoise);
+        }
+
+        .consent-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .consent-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .consent-button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .consent-button:hover {
+            background: var(--primary-turquoise);
+            transform: translateY(-2px);
+        }
+
+        .consent-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ============ FAMILY DASHBOARD ============ */
+        .family-header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .family-title h1 {
+            color: var(--primary-turquoise);
+            margin-bottom: 5px;
+        }
+
+        .family-subtitle {
+            color: #666;
+        }
+
+        .add-patient-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .add-patient-btn:hover {
+            background: var(--primary-turquoise);
+        }
+
+        .patients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .patient-card-tamagotchi {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .patient-card-tamagotchi:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .patient-card-tamagotchi::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-turquoise));
+        }
+
+        .tamagotchi-avatar-container {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .tamagotchi-avatar {
+            font-size: 5em;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .health-status-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .health-status-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .health-status-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .daily-actions {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+
+        .action-button {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .action-button:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-green);
+        }
+
+        .action-button.completed {
+            background: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+
+        .action-button.completed::after {
+            content: '✓';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: white;
+            color: var(--primary-green);
+            font-size: 0.6em;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .streak-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .patient-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin: 10px 0 5px 0;
+            text-align: center;
+        }
+
+        .patient-relation {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        /* ============ TAMAGOTCHI DETAIL VIEW ============ */
+        .tamagotchi-detail {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: #ccc;
+        }
+
+        .tamagotchi-main {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .tamagotchi-character {
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .big-avatar {
+            font-size: 10em;
+            animation: float 3s ease-in-out infinite;
+            margin: 20px 0;
+        }
+
+        .mood-indicator {
+            font-size: 3em;
+            margin-top: 20px;
+        }
+
+        .stats-panel {
+            display: grid;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-turquoise);
+        }
+
+        .stat-title {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            color: var(--primary-turquoise);
+            font-weight: bold;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .action-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-card:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+        }
+
+        .action-card.completed {
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.1), rgba(18, 140, 126, 0.1));
+            border-color: var(--primary-green);
+        }
+
+        .action-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .action-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .action-subtitle {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .goals-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .goal-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .goal-title {
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .goal-progress {
+            font-size: 1.2em;
+            color: var(--primary-turquoise);
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-turquoise));
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .milestones {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .milestone {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .milestone.achieved {
+            border-color: var(--gold);
+            background: linear-gradient(135deg, #fff9e6, #fff);
+        }
+
+        .milestone-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .milestone.achieved .milestone-icon {
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .points-display {
+            background: linear-gradient(135deg, var(--gold), #ffa502);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
+
+        .level-badge {
+            background: var(--primary-turquoise);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .tamagotchi-main {
+                grid-template-columns: 1fr;
+            }
+
+            .patients-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- CONSENT SCREEN -->
+        <div id="consent-view" class="view active">
+            <div class="consent-screen">
+                <div class="consent-header">
+                    <div class="consent-icon">🔐</div>
+                    <h1>Autorización de Datos Sensibles</h1>
+                    <p>Gestión Familiar de Salud</p>
+                </div>
+
+                <div class="consent-box">
+                    <h3>📋 Información Importante</h3>
+                    <p style="margin-top: 10px; line-height: 1.6;">
+                        Esta plataforma permite gestionar la salud de toda tu familia (niños, adultos y ancianos)
+                        desde una única cuenta. Por favor, confirma que tienes autorización para acceder a los
+                        datos de salud de cada miembro.
+                    </p>
+                </div>
+
+                <div class="consent-item">
+                    <input type="checkbox" id="consent1">
+                    <label for="consent1">
+                        <strong>Soy el titular de la cuenta familiar</strong> y tengo autorización legal
+                        para gestionar los datos de salud de menores de edad y/o adultos mayores a mi cargo.
+                    </label>
+                </div>
+
+                <div class="consent-item">
+                    <input type="checkbox" id="consent2">
+                    <label for="consent2">
+                        <strong>Entiendo que los datos médicos son sensibles</strong> y me comprometo a
+                        mantener la confidencialidad de la información de salud de todos los miembros.
+                    </label>
+                </div>
+
+                <div class="consent-item">
+                    <input type="checkbox" id="consent3">
+                    <label for="consent3">
+                        <strong>Acepto los términos de uso</strong> de la plataforma de Gemelo Digital
+                        y las políticas de privacidad (HIPAA, GDPR, Ley 1581 de 2012 Colombia).
+                    </label>
+                </div>
+
+                <button class="consent-button" id="continueBtn" disabled onclick="acceptConsent()">
+                    Continuar a Mi Cuenta Familiar
+                </button>
+
+                <p style="text-align: center; margin-top: 20px; color: #666; font-size: 0.9em;">
+                    🔒 Tus datos están protegidos con encriptación de grado médico
+                </p>
+            </div>
+        </div>
+
+        <!-- FAMILY DASHBOARD -->
+        <div id="family-view" class="view">
+            <div class="family-header">
+                <div class="family-title">
+                    <h1>👨‍👩‍👧‍👦 Mi Familia Saludable</h1>
+                    <p class="family-subtitle">Gestiona la salud de todos los miembros desde un solo lugar</p>
+                </div>
+                <button class="add-patient-btn" onclick="addNewPatient()">+ Agregar Miembro</button>
+            </div>
+
+            <div class="patients-grid" id="patientsGrid"></div>
+        </div>
+
+        <!-- TAMAGOTCHI DETAIL -->
+        <div id="tamagotchi-view" class="view">
+            <div class="tamagotchi-detail">
+                <div class="detail-header">
+                    <button class="back-button" onclick="backToFamily()">← Volver a Familia</button>
+                    <div>
+                        <span class="points-display" id="pointsDisplay">⭐ 0 puntos</span>
+                        <span class="level-badge" id="levelBadge">Nivel 1</span>
+                    </div>
+                </div>
+
+                <div class="tamagotchi-main">
+                    <div class="tamagotchi-character">
+                        <div class="big-avatar" id="bigAvatar">👤</div>
+                        <h2 id="patientNameDetail">Paciente</h2>
+                        <p id="patientInfoDetail">Info</p>
+                        <div class="mood-indicator" id="moodIndicator">😊</div>
+                        <p style="margin-top: 10px; color: #666;" id="moodText">Estado de ánimo: Feliz</p>
+                    </div>
+
+                    <div class="stats-panel">
+                        <div class="stat-card">
+                            <div class="stat-title">
+                                💪 Salud General
+                                <span id="healthPercentage">100%</span>
+                            </div>
+                            <div class="health-status-bar">
+                                <div class="health-status-fill" id="healthBar" style="width: 100%"></div>
+                                <div class="health-status-label" id="healthLabel">Excelente</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-title">🔥 Racha de días</div>
+                            <div class="stat-value" id="streakDays">0</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-title">✅ Tareas completadas hoy</div>
+                            <div class="stat-value" id="tasksToday">0/6</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 30px 0 15px 0;">🎯 Acciones Diarias de Salud</h3>
+                <div class="actions-grid" id="actionsGrid"></div>
+
+                <div class="goals-section">
+                    <h3 style="margin-bottom: 20px;">🏆 Objetivos de Vida Saludable</h3>
+                    <div id="goalsContainer"></div>
+                </div>
+
+                <div class="goals-section">
+                    <h3 style="margin-bottom: 20px;">🎖️ Hitos Alcanzados</h3>
+                    <div class="milestones" id="milestonesContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace with your own OpenAI API key
+        // Get your key at: https://platform.openai.com/api-keys
+        const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
+
+        // Family members database
+        let familyMembers = [
+            {
+                id: 1,
+                name: 'María González',
+                relation: 'Yo (Titular)',
+                age: 45,
+                avatar: '👩',
+                healthScore: 65,
+                streak: 7,
+                points: 850,
+                level: 3,
+                dailyActions: {
+                    medication: false,
+                    exercise: false,
+                    nutrition: false,
+                    water: false,
+                    sleep: false,
+                    checkup: false
+                },
+                goals: [
+                    { title: 'Reducir presión arterial', current: 140, target: 120, unit: 'mmHg', progress: 30 },
+                    { title: 'Control de glucosa', current: 160, target: 100, unit: 'mg/dL', progress: 45 },
+                    { title: 'Caminar 10,000 pasos/día', current: 6500, target: 10000, unit: 'pasos', progress: 65 }
+                ],
+                milestones: [
+                    { icon: '🥇', title: '7 días consecutivos', achieved: true },
+                    { icon: '💊', title: '30 días medicación', achieved: true },
+                    { icon: '🏃', title: '100 km caminados', achieved: false },
+                    { icon: '🥗', title: 'Dieta balanceada 21 días', achieved: false }
+                ]
+            },
+            {
+                id: 2,
+                name: 'Carlos González',
+                relation: 'Esposo',
+                age: 48,
+                avatar: '👨',
+                healthScore: 80,
+                streak: 14,
+                points: 1240,
+                level: 4,
+                dailyActions: {
+                    medication: true,
+                    exercise: true,
+                    nutrition: false,
+                    water: true,
+                    sleep: true,
+                    checkup: false
+                },
+                goals: [
+                    { title: 'Reducir colesterol', current: 220, target: 180, unit: 'mg/dL', progress: 55 },
+                    { title: 'Perder peso', current: 85, target: 75, unit: 'kg', progress: 70 }
+                ],
+                milestones: [
+                    { icon: '🥇', title: '14 días consecutivos', achieved: true },
+                    { icon: '💪', title: 'Ejercicio 50 días', achieved: true },
+                    { icon: '⚖️', title: 'Meta de peso', achieved: false }
+                ]
+            },
+            {
+                id: 3,
+                name: 'Sofía González',
+                relation: 'Hija',
+                age: 12,
+                avatar: '👧',
+                healthScore: 95,
+                streak: 21,
+                points: 1850,
+                level: 5,
+                dailyActions: {
+                    medication: false,
+                    exercise: true,
+                    nutrition: true,
+                    water: true,
+                    sleep: true,
+                    checkup: true
+                },
+                goals: [
+                    { title: 'Actividad física diaria', current: 18, target: 21, unit: 'días', progress: 86 },
+                    { title: 'Dormir 8 horas', current: 7.5, target: 8, unit: 'horas', progress: 94 }
+                ],
+                milestones: [
+                    { icon: '🥇', title: '21 días consecutivos', achieved: true },
+                    { icon: '🏀', title: 'Deporte regular', achieved: true },
+                    { icon: '📚', title: 'Salud preventiva', achieved: true }
+                ]
+            },
+            {
+                id: 4,
+                name: 'Abuela Rosa',
+                relation: 'Madre (Anciana)',
+                age: 78,
+                avatar: '👵',
+                healthScore: 70,
+                streak: 5,
+                points: 620,
+                level: 2,
+                dailyActions: {
+                    medication: true,
+                    exercise: false,
+                    nutrition: true,
+                    water: false,
+                    sleep: true,
+                    checkup: false
+                },
+                goals: [
+                    { title: 'Tomar medicación a tiempo', current: 28, target: 30, unit: 'días', progress: 93 },
+                    { title: 'Caminar 15 min/día', current: 12, target: 15, unit: 'días', progress: 80 }
+                ],
+                milestones: [
+                    { icon: '💊', title: 'Adherencia medicación', achieved: true },
+                    { icon: '🚶‍♀️', title: 'Movilidad activa', achieved: false }
+                ]
+            }
+        ];
+
+        let currentPatient = null;
+
+        // Check consent checkboxes
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', checkConsent);
+        });
+
+        function checkConsent() {
+            const consent1 = document.getElementById('consent1').checked;
+            const consent2 = document.getElementById('consent2').checked;
+            const consent3 = document.getElementById('consent3').checked;
+            document.getElementById('continueBtn').disabled = !(consent1 && consent2 && consent3);
+        }
+
+        function acceptConsent() {
+            showView('family');
+            renderFamilyDashboard();
+        }
+
+        function renderFamilyDashboard() {
+            const grid = document.getElementById('patientsGrid');
+            grid.innerHTML = familyMembers.map(member => {
+                const tasksCompleted = Object.values(member.dailyActions).filter(v => v).length;
+                const totalTasks = Object.keys(member.dailyActions).length;
+                const healthColor = member.healthScore >= 80 ? '#1dd1a1' : member.healthScore >= 60 ? '#feca57' : '#ff6b6b';
+
+                return `
+                    <div class="patient-card-tamagotchi" onclick="openTamagotchi(${member.id})">
+                        <div class="tamagotchi-avatar-container">
+                            <div class="tamagotchi-avatar">${member.avatar}</div>
+                        </div>
+
+                        <div class="patient-name">${member.name}</div>
+                        <div class="patient-relation">${member.relation} • ${member.age} años</div>
+
+                        <div class="health-status-bar">
+                            <div class="health-status-fill" style="width: ${member.healthScore}%; background: ${healthColor};"></div>
+                            <div class="health-status-label">Salud: ${member.healthScore}%</div>
+                        </div>
+
+                        <div class="streak-badge">🔥 ${member.streak} días</div>
+                        <span style="margin-left: 10px; font-size: 0.9em; color: #666;">⭐ ${member.points} pts</span>
+
+                        <div class="daily-actions">
+                            ${Object.entries(member.dailyActions).slice(0, 4).map(([action, completed]) => {
+                                const icons = { medication: '💊', exercise: '🏃', nutrition: '🥗', water: '💧', sleep: '😴', checkup: '🩺' };
+                                return `<div class="action-button ${completed ? 'completed' : ''}">${icons[action]}</div>`;
+                            }).join('')}
+                        </div>
+
+                        <div style="text-align: center; margin-top: 10px; font-size: 0.9em; color: #666;">
+                            ${tasksCompleted}/${totalTasks} tareas completadas hoy
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openTamagotchi(memberId) {
+            currentPatient = familyMembers.find(m => m.id === memberId);
+            showView('tamagotchi');
+            renderTamagotchiDetail();
+        }
+
+        function renderTamagotchiDetail() {
+            const p = currentPatient;
+            const tasksCompleted = Object.values(p.dailyActions).filter(v => v).length;
+            const totalTasks = Object.keys(p.dailyActions).length;
+
+            // Update header
+            document.getElementById('bigAvatar').textContent = p.avatar;
+            document.getElementById('patientNameDetail').textContent = p.name;
+            document.getElementById('patientInfoDetail').textContent = `${p.relation} • ${p.age} años`;
+            document.getElementById('pointsDisplay').textContent = `⭐ ${p.points} puntos`;
+            document.getElementById('levelBadge').textContent = `Nivel ${p.level}`;
+
+            // Update mood
+            const mood = p.healthScore >= 80 ? { icon: '😊', text: 'Feliz y saludable' } :
+                         p.healthScore >= 60 ? { icon: '😐', text: 'Necesita atención' } :
+                         { icon: '😟', text: 'Requiere cuidado' };
+            document.getElementById('moodIndicator').textContent = mood.icon;
+            document.getElementById('moodText').textContent = `Estado: ${mood.text}`;
+
+            // Update stats
+            document.getElementById('healthPercentage').textContent = `${p.healthScore}%`;
+            document.getElementById('healthBar').style.width = `${p.healthScore}%`;
+            document.getElementById('healthLabel').textContent = p.healthScore >= 80 ? 'Excelente' : p.healthScore >= 60 ? 'Bien' : 'Mejorable';
+            document.getElementById('streakDays').textContent = p.streak;
+            document.getElementById('tasksToday').textContent = `${tasksCompleted}/${totalTasks}`;
+
+            // Render daily actions
+            const actionsMap = {
+                medication: { icon: '💊', title: 'Medicación', subtitle: 'Tomar medicamentos' },
+                exercise: { icon: '🏃', title: 'Ejercicio', subtitle: '30 min actividad' },
+                nutrition: { icon: '🥗', title: 'Nutrición', subtitle: 'Comida saludable' },
+                water: { icon: '💧', title: 'Hidratación', subtitle: '8 vasos de agua' },
+                sleep: { icon: '😴', title: 'Descanso', subtitle: '7-8 horas sueño' },
+                checkup: { icon: '🩺', title: 'Control', subtitle: 'Revisión médica' }
+            };
+
+            document.getElementById('actionsGrid').innerHTML = Object.entries(p.dailyActions).map(([action, completed]) => {
+                const data = actionsMap[action];
+                return `
+                    <div class="action-card ${completed ? 'completed' : ''}" onclick="toggleAction('${action}')">
+                        <div class="action-icon">${data.icon}</div>
+                        <div class="action-title">${data.title}</div>
+                        <div class="action-subtitle">${data.subtitle}</div>
+                        ${completed ? '<div style="color: var(--primary-green); font-weight: bold; margin-top: 10px;">✓ Completado</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // Render goals
+            document.getElementById('goalsContainer').innerHTML = p.goals.map(goal => `
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <div class="goal-title">${goal.title}</div>
+                        <div class="goal-progress">${goal.progress}%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${goal.progress}%"></div>
+                    </div>
+                    <div style="margin-top: 8px; color: #666; font-size: 0.9em;">
+                        Actual: ${goal.current} ${goal.unit} → Meta: ${goal.target} ${goal.unit}
+                    </div>
+                </div>
+            `).join('');
+
+            // Render milestones
+            document.getElementById('milestonesContainer').innerHTML = p.milestones.map(milestone => `
+                <div class="milestone ${milestone.achieved ? 'achieved' : ''}">
+                    <div class="milestone-icon">${milestone.icon}</div>
+                    <div style="font-size: 0.9em; font-weight: bold;">${milestone.title}</div>
+                    ${milestone.achieved ? '<div style="color: var(--gold); margin-top: 5px;">✓ Logrado</div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function toggleAction(action) {
+            currentPatient.dailyActions[action] = !currentPatient.dailyActions[action];
+
+            // Award points
+            if (currentPatient.dailyActions[action]) {
+                currentPatient.points += 50;
+                currentPatient.healthScore = Math.min(100, currentPatient.healthScore + 2);
+            } else {
+                currentPatient.points -= 50;
+                currentPatient.healthScore = Math.max(0, currentPatient.healthScore - 2);
+            }
+
+            renderTamagotchiDetail();
+        }
+
+        function backToFamily() {
+            showView('family');
+            renderFamilyDashboard();
+        }
+
+        function addNewPatient() {
+            alert('Funcionalidad de agregar nuevo miembro familiar próximamente. Por ahora, gestiona los 4 miembros de ejemplo.');
+        }
+
+        function showView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`${viewName}-view`).classList.add('active');
+        }
+    </script>
+</body>
+</html>

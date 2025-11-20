@@ -1,0 +1,313 @@
+Useful description of the platform (intention + objectives)
+
+This platform is a preventive health activation engine for a prepaid health insurer. Its core intention is to stop thinking in terms of “mass invitations to programs” and start thinking in terms of “hyper-personalized conversations with each person’s future self”.
+
+Instead of sending generic messages like “Recuerde asistir a su programa de hipertensión”, the platform uses a Digital Twin of each user to build a deeply personal narrative: their risks, their pending controls, their opportunities to avoid complications, and the concrete benefit (for them and their family) of entering a specific health program now, not later. That narrative is then delivered in a channel that feels natural for the user (for the MVP, simulated via WhatsApp), in the voice of their “yo del futuro”: an empathetic, sometimes dramatic but ultimately caring version of themselves.
+
+At the same time, the platform is not only a patient-facing experience. Behind the scenes, it builds a “gemelo poblacional” for the insurer: a consolidated view of risk, readiness to act, and expected economic impact (complications avoided, costs at 90 days, etc.). The insurer can see which cohorts are ready to move, what messages work best with which segments, and how improved adherence and program enrollment translate into financial sustainability.
+
+In this hackathon stage, the platform is an MVP fully simulated with synthetic data (e.g. ~300 fictitious patients). There is no use of real company data; instead, we mimic realistic behavioral patterns, clinical risk profiles, and interaction histories to show clearly how the system would work in production. The simulation focuses on one main scenario: a WhatsApp-like conversation where the “yo del futuro” guides a user from curiosity to action, and a dashboard where the insurer sees, in aggregate, how these micro-conversations could change risk and cost trajectories.
+
+The purpose is not only to show a pretty interface, but to demonstrate that it is possible to:
+
+Personalize invitations at scale,
+
+Segment and prioritize the right patients at the right time, and
+
+Make that personalization visible as measurable impact in coverage, adherence, and cost.
+
+2. Main and secondary objectives (from the intention point of view)
+Main objective (intention)
+
+Incrementar la cobertura de la población susceptible en los programas de salud del asegurador prepagado mediante un producto tecnológico basado en gemelos digitales y experiencias conversacionales hiperpersonalizadas.
+
+In other words: turn invitations into experiences so relevant and emotionally convincing that people voluntarily move towards prevention, in a way that also makes sense financially for the insurer.
+
+Specific objectives (and what they really mean)
+
+Personalizar el contenido de la invitación mediante un gemelo digital.
+Intention:
+
+Que el usuario sienta “me están hablando a mí”, no a un segmento abstracto.
+
+Que el mensaje combine:
+
+Datos clínico-simulados (edad, sexo, riesgo estimado, programas sugeridos).
+
+Comportamiento digital (horarios de respuesta, canal preferido, fricción previa).
+
+Que la invitación llegue en forma de:
+
+Mensaje tipo WhatsApp y/o email.
+
+Plus: una mini landing donde el usuario “conoce a su yo del futuro”.
+
+Segmentar al paciente con base en la data proveniente del gemelo digital y la interacción con la plataforma.
+Intention:
+
+No trabajar con segmentaciones estáticas (una foto en el tiempo), sino:
+
+Capas de riesgo clínico (sano, susceptible, condición estable, alta complejidad).
+
+Capas de comportamiento (abre mensajes, ignora, hace clic pero no agenda, agenda pero no asiste).
+
+Identificar ventanas de momento:
+
+Quién está listo para actuar hoy.
+
+Quién requiere más persuasión.
+
+Quién necesita otro canal (llamada humana, punto presencial, etc.).
+
+Garantizar la asistencia efectiva de los pacientes a los programas.
+Intention:
+
+No basta con que el paciente diga “sí, suena interesante”.
+
+El flujo ideal es:
+
+Invitación personalizada → conversación con su “yo del futuro” → recomendación de programa → simulación de agendamiento → recordatorio → confirmación.
+
+En el MVP:
+
+No necesitamos una integración real con la agenda clínica, pero sí debemos simular:
+
+Que se reserva una cita.
+
+Que el sistema registra “asistencia” o “no show”.
+
+Que el asegurador puede ver la tasa de conversión completa (desde invitación hasta asistencia).
+
+Otros elementos clave que salieron de las conversaciones
+
+Datos sintéticos:
+
+La base de ~300 pacientes es simulada; no usamos datos reales.
+
+Podemos incluir:
+
+Edad, sexo, ciudad.
+
+Diagnósticos probables (hipertensión, obesidad, embarazo, etc.).
+
+Uso simulado de urgencias, hospitalizaciones, controles pendientes.
+
+Variables de comportamiento digital (apertura, abandono, tiempo de respuesta).
+
+Opcional: datos simulados de smartwatch (pasos, frecuencia cardiaca, sueño).
+
+Canales y experiencia de usuario:
+
+WhatsApp (simulado en web) como canal principal.
+
+Email y redes sociales (Rels/Reels, campañas) como generadores de leads.
+
+Puntos físicos (sala de espera, kioscos) como escenarios futuros.
+
+Perspectiva del asegurador / gemelo poblacional:
+
+Ver:
+
+Qué cohortes están subatendidas.
+
+Qué mensajes funcionan mejor con qué perfiles.
+
+Qué impacto económico podría tener aumentar la cobertura y adherencia en 90 días.
+
+3. Prompt e instrucciones para el LLM que va a ayudar a construir la plataforma
+
+Lo siguiente es un prompt que puedes usar directamente con un LLM “arquitecto/desarrollador” para guiar la construcción del sistema:
+
+Prompt para el LLM constructor de la plataforma
+
+Eres un LLM arquitecto y desarrollador senior. Tu misión es ayudar a diseñar y especificar una plataforma MVP para un hackatón de salud digital, siguiendo estas intenciones y restricciones.
+
+1. Contexto del problema
+
+Trabajamos con un asegurador de medicina prepagada. Hoy los pacientes reciben invitaciones genéricas a programas como hipertensión, obesidad, control prenatal, etc. La tasa de respuesta y asistencia es limitada. La pregunta del reto es:
+
+“¿Cómo podemos transformar activamente la invitación a nuestros programas de salud en experiencias tan relevantes y atractivas que los usuarios se movilicen voluntariamente hacia la prevención, generando un impacto tangible en su bienestar y en la sostenibilidad financiera de la organización?”
+
+Queremos responder a esto construyendo un MVP de plataforma basado en:
+
+Gemelo digital individual del paciente.
+
+Gemelo poblacional para el asegurador.
+
+Una experiencia conversacional con el “yo del futuro” del paciente, principalmente en un escenario tipo WhatsApp (simulado).
+
+Datos completamente sintéticos, sin usar información real de la compañía.
+
+2. Objetivos que la plataforma debe cumplir
+
+Diseña todo lo que propongas para que la plataforma pueda:
+
+Personalizar el contenido de la invitación mediante un gemelo digital:
+
+El gemelo digital resume:
+
+Riesgos clave (ej: riesgo de complicación de hipertensión en 5 años).
+
+Controles pendientes.
+
+Uso previo de urgencias.
+
+Patrones de comportamiento digital básicos.
+
+A partir de esa información, la plataforma genera:
+
+Un mensaje tipo WhatsApp o carta digital donde el “yo del futuro” le habla al usuario.
+
+Un llamado a la acción concreto para entrar a un programa de salud.
+
+Segmentar y priorizar pacientes en función de:
+
+Datos clínico-simulados (edad, condiciones, riesgo).
+
+Datos de comportamiento digital (aperturas, clics, abandono, horarios de respuesta).
+
+Preferencias de canal (WhatsApp, email, punto presencial).
+
+Resultado: saber a quién invitar primero, con qué tono y por qué programa.
+
+Simular la asistencia efectiva:
+
+Sin conectar a sistemas reales, pero mostrando claramente:
+
+Cómo se agenda una cita.
+
+Cómo se confirmaría la asistencia.
+
+Cómo se registraría “asistió / no asistió”.
+
+Incluir un concepto mínimo de “embudo”:
+
+Invitado → interactúa → acepta → agenda → asiste.
+
+Ofrecer una vista poblacional al asegurador:
+
+Un dashboard que muestre:
+
+Número de pacientes por nivel de riesgo.
+
+Cohortes listas para activar programas.
+
+Efecto simulado sobre costos evitables a 90 días si se aumenta la cobertura.
+
+3. Restricciones y alcance del MVP
+
+Todos los datos deben ser simulados (ej. ~300 pacientes ficticios).
+
+El MVP debe funcionar de forma demostrable:
+
+Un front-end donde se vea el chat tipo WhatsApp con el “yo del futuro”.
+
+Un front-end con una carta de invitación generada a partir del gemelo digital.
+
+Un front-end para el dashboard poblacional del asegurador.
+
+Es suficiente con un solo escenario central bien simulado (por ejemplo, paciente con riesgo de hipertensión/obesidad o una gestante con riesgo específico).
+
+4. Qué espero que construyas y especifiques
+
+Tu tarea es:
+
+Describir claramente la arquitectura funcional de la plataforma, incluyendo:
+
+Módulo de generación y almacenamiento del gemelo digital.
+
+Módulo de segmentación y scoring de pacientes.
+
+Módulo de generación de copy/invitaciones (basado en LLM).
+
+Módulo de chat del “yo del futuro”.
+
+Módulo de simulación de agenda y asistencia.
+
+Módulo de dashboard poblacional.
+
+Explicar cómo se entrenan/llenan los gemelos digitales con datos sintéticos, incluyendo:
+
+Qué variables clave tendrá cada paciente.
+
+Cómo se simulan:
+
+Riesgos clínicos.
+
+Uso de urgencias.
+
+Comportamiento digital.
+
+Datos de smartwatch u otros dispositivos (si aplica).
+
+Definir los flujos clave del usuario:
+
+Desde que recibe un mensaje/invitación.
+
+Hasta que conversa con su “yo del futuro”.
+
+Hasta que acepta entrar al programa y “agenda” una cita simulada.
+
+Cómo se actualizaría el gemelo digital según sus acciones.
+
+Definir los flujos clave del asegurador:
+
+Cómo consulta el dashboard.
+
+Qué métricas ve sobre:
+
+Cobertura actual vs. potencial.
+
+Cohortes prioritarias.
+
+Impacto económico simulado.
+
+Especificar el rol del modelo de lenguaje (LLM) en cada parte:
+
+Cómo se usa para:
+
+Generar el contenido de invitaciones.
+
+Dar voz al “yo del futuro”.
+
+Explicar al usuario su plan de cuidados de forma comprensible.
+
+Qué “guardrails” o limitaciones textuales debe respetar:
+
+No hacer diagnósticos médicos ni reemplazar juicio clínico.
+
+Enfocarse en educación, motivación, adherencia y prevención.
+
+Incluir instrucciones claras sobre configuración de la API de OpenAI:
+
+Indica que el sistema debe leer la clave desde una variable de entorno (no hardcodearla).
+
+Señala que, si la API key no está configurada, el sistema debe:
+
+Advertir al usuario.
+
+Pedir que se configure la variable correspondiente antes de usar funciones de IA.
+
+5. Estilo de salida que quiero de ti
+
+Responde con:
+
+Descripciones claras, ordenadas por módulos y flujos.
+
+Explicación de cómo todo esto se alinea con:
+
+El objetivo general de aumentar la cobertura en programas de salud.
+
+Los tres objetivos específicos: personalización, segmentación y asistencia efectiva.
+
+Instrucciones accionables para que un equipo de desarrollo humano pueda traducir esto en código (backend, frontends, base de datos y llamadas a LLM).
+
+No generes código ahora; concéntrate en:
+
+Diseño funcional.
+
+Arquitectura lógica.
+
+Flujos de interacción.
+
+Detalle suficiente para que otra IA o equipo técnico pueda implementar el sistema.

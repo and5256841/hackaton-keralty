@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Gemelo Digital - Asegurador</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #25D366;
+            --primary-turquoise: #128C7E;
+            --dark-turquoise: #075E54;
+            --light-bg: #ECE5DD;
+            --white: #FFFFFF;
+            --text-dark: #303030;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-turquoise) 0%, var(--dark-turquoise) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* PANTALLA 1: SELECCIÓN DE PACIENTE */
+        #patient-selection-view {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .selection-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .selection-header h1 {
+            font-size: 2.5em;
+            color: var(--primary-turquoise);
+            margin-bottom: 10px;
+        }
+
+        .selection-header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .patients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .patient-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .patient-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-color: var(--primary-green);
+        }
+
+        .patient-avatar-large {
+            font-size: 4em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .patient-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .patient-details {
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+
+        .risk-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .risk-low { background: #d4edda; color: #155724; }
+        .risk-medium { background: #fff3cd; color: #856404; }
+        .risk-high { background: #f8d7da; color: #721c24; }
+
+        /* PANTALLA 2: CHAT */
+        #chat-view {
+            display: none;
+            width: 100%;
+            max-width: 480px;
+            height: 95vh;
+            background: var(--light-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: var(--primary-turquoise);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar-container {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: var(--light-bg);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 8px;
+            word-wrap: break-word;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .message.user .message-bubble {
+            background: #DCF8C6;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .chart-container canvas {
+            max-width: 100%;
+        }
+
+        .reference {
+            font-size: 0.75em;
+            color: #666;
+            font-style: italic;
+            margin-top: 8px;
+            padding: 8px;
+            background: #f9f9f9;
+            border-left: 3px solid var(--primary-turquoise);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 8px;
+            width: 60px;
+            margin-bottom: 15px;
+        }
+
+        .typing-indicator.show { display: block; }
+
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background: #999;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .input-area {
+            padding: 15px;
+            background: #F0F0F0;
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        #sendButton {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* PANTALLA 3: GEMELO DIGITAL REDISEÑADO */
+        #digital-twin-view {
+            display: none;
+            width: 100%;
+            max-width: 1400px;
+            height: 95vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .twin-header-new {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .twin-header-new::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .twin-content-new {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            background: #f8f9fa;
+        }
+
+        .interactive-twin {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .avatar-section {
+            text-align: center;
+        }
+
+        .interactive-avatar {
+            width: 250px;
+            height: 350px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .health-indicator {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 4px solid;
+        }
+
+        .indicator-heart {
+            top: 30%;
+            left: -20px;
+            border-color: #ff6b6b;
+        }
+
+        .indicator-kidney {
+            bottom: 30%;
+            left: -20px;
+            border-color: #4ecdc4;
+        }
+
+        .indicator-lung {
+            top: 30%;
+            right: -20px;
+            border-color: #95e1d3;
+        }
+
+        .info-section {
+            display: grid;
+            gap: 20px;
+        }
+
+        .info-card-new {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card-new::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--primary-turquoise);
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--primary-turquoise);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .metric-box {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .metric-value-large {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-turquoise);
+        }
+
+        .metric-label-small {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .timeline-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-turquoise);
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+            border: 4px solid white;
+            box-shadow: 0 0 0 2px var(--primary-turquoise);
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+        }
+
+        .timeline-date {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .programs-innovative {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .program-card-new {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .program-card-new::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary-green);
+        }
+
+        .program-card-new.urgent::before {
+            background: #ff6b6b;
+        }
+
+        .program-card-new:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .cta-button {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            background: var(--primary-turquoise);
+            transform: scale(1.05);
+        }
+
+        .back-button {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        /* PANTALLA 4: PANEL ASEGURADOR */
+        #insurer-view {
+            display: none;
+            width: 100%;
+            max-width: 1400px;
+            height: 95vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .insurer-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+        }
+
+        .insurer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .cadence-config {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .cadence-title {
+            font-size: 1.5em;
+            color: var(--primary-turquoise);
+            margin-bottom: 20px;
+        }
+
+        .cadence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .cadence-item {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .cadence-item label {
+            display: block;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .cadence-item select,
+        .cadence-item input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .save-cadence-btn {
+            background: var(--primary-turquoise);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- PANTALLA 1: SELECCIÓN DE PACIENTE -->
+    <div id="patient-selection-view">
+        <div class="selection-header">
+            <h1>🏥 Selección de Paciente</h1>
+            <p>Elige un perfil para iniciar la conversación personalizada</p>
+        </div>
+
+        <div class="patients-grid" id="patientsGrid"></div>
+    </div>
+
+    <!-- PANTALLA 2: CHAT -->
+    <div id="chat-view">
+        <div class="chat-header">
+            <div class="avatar-container">
+                <span id="chatAvatar">🔮</span>
+            </div>
+            <div class="chat-info">
+                <h2 id="chatTitle">Tu Yo del Futuro</h2>
+                <p id="chatStatus">En línea</p>
+            </div>
+        </div>
+
+        <div class="messages-area" id="messagesArea"></div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span><span></span><span></span>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Escribe un mensaje..." />
+            <button id="sendButton">➤</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 3: GEMELO DIGITAL INNOVADOR -->
+    <div id="digital-twin-view">
+        <div class="twin-header-new">
+            <div class="header-content">
+                <h1>🧬 Gemelo Digital Interactivo</h1>
+                <p id="twinHeaderSubtitle">Tu perfil de salud completo y personalizado</p>
+            </div>
+        </div>
+
+        <div class="twin-content-new" id="twinContentNew"></div>
+    </div>
+
+    <!-- PANTALLA 4: PANEL ASEGURADOR -->
+    <div id="insurer-view">
+        <div class="insurer-header">
+            <h1>📊 Panel de Gestión - Asegurador</h1>
+            <p>Configuración de cadencia y monitoreo poblacional</p>
+        </div>
+
+        <div class="insurer-content">
+            <div class="cadence-config">
+                <h2 class="cadence-title">⏰ Configuración de Cadencia de Mensajes</h2>
+
+                <div class="cadence-grid">
+                    <div class="cadence-item">
+                        <label>Frecuencia de WhatsApp</label>
+                        <select id="whatsappFreq">
+                            <option value="daily">Diario</option>
+                            <option value="weekly" selected>Semanal</option>
+                            <option value="biweekly">Quincenal</option>
+                            <option value="monthly">Mensual</option>
+                        </select>
+                    </div>
+
+                    <div class="cadence-item">
+                        <label>Frecuencia de Llamadas</label>
+                        <select id="callFreq">
+                            <option value="weekly">Semanal</option>
+                            <option value="biweekly" selected>Quincenal</option>
+                            <option value="monthly">Mensual</option>
+                        </select>
+                    </div>
+
+                    <div class="cadence-item">
+                        <label>Recordatorio de Citas</label>
+                        <select id="apptReminder">
+                            <option value="24h" selected>24 horas antes</option>
+                            <option value="48h">48 horas antes</option>
+                            <option value="72h">72 horas antes</option>
+                        </select>
+                    </div>
+
+                    <div class="cadence-item">
+                        <label>Mensaje de Cumpleaños</label>
+                        <select id="birthdayMsg">
+                            <option value="yes" selected>Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+
+                    <div class="cadence-item">
+                        <label>Encuestas de Seguimiento</label>
+                        <select id="surveyFreq">
+                            <option value="weekly">Semanal</option>
+                            <option value="monthly" selected>Mensual</option>
+                            <option value="quarterly">Trimestral</option>
+                        </select>
+                    </div>
+
+                    <div class="cadence-item">
+                        <label>Alertas de Alto Riesgo</label>
+                        <select id="highRiskAlerts">
+                            <option value="immediate" selected>Inmediato</option>
+                            <option value="daily">Diario</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="save-cadence-btn" onclick="saveCadenceConfig()">
+                    💾 Guardar Configuración
+                </button>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="back-button" onclick="showView('selection')">Volver a Selección</button>
+                <button class="cta-button" onclick="downloadData()">📥 Descargar Reporte Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace with your own OpenAI API key
+        // Get your key at: https://platform.openai.com/api-keys
+        const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
+
+        const SAMPLE_PATIENTS = [
+            {
+                name: 'María González',
+                age: 45,
+                city: 'Bogotá',
+                avatar: '👩',
+                riskLevel: 'high',
+                conditions: ['Hipertensión', 'Diabetes Tipo 2', 'Obesidad'],
+                gfr: 55, // Tasa de filtración glomerular
+                cardiovascularRisk: 35 // % riesgo cardiovascular a 10 años
+            },
+            {
+                name: 'Juan Pérez',
+                age: 52,
+                city: 'Medellín',
+                avatar: '👨',
+                riskLevel: 'medium',
+                conditions: ['Prediabetes', 'Hipercolesterolemia'],
+                gfr: 75,
+                cardiovascularRisk: 18
+            },
+            {
+                name: 'Ana Martínez',
+                age: 30,
+                city: 'Cali',
+                avatar: '👩‍⚕️',
+                riskLevel: 'low',
+                conditions: [],
+                gfr: 95,
+                cardiovascularRisk: 3
+            },
+            {
+                name: 'Carlos Rodríguez',
+                age: 58,
+                city: 'Barranquilla',
+                avatar: '👨‍⚕️',
+                riskLevel: 'high',
+                conditions: ['EPOC', 'Hipertensión', 'Insuficiencia Renal Leve'],
+                gfr: 48,
+                cardiovascularRisk: 42
+            }
+        ];
+
+        let selectedPatient = null;
+        let conversationHistory = [];
+        let messageCount = 0; // Track user messages to trigger call-to-action
+        let initialMessagesSent = false; // Prevent infinite loop
+
+        // INITIALIZE
+        window.onload = function() {
+            renderPatientSelection();
+        };
+
+        function renderPatientSelection() {
+            const grid = document.getElementById('patientsGrid');
+            grid.innerHTML = SAMPLE_PATIENTS.map((patient, index) => `
+                <div class="patient-card" onclick="selectPatient(${index})">
+                    <div class="patient-avatar-large">${patient.avatar}</div>
+                    <div class="patient-name">${patient.name}</div>
+                    <div class="patient-details">
+                        ${patient.age} años • ${patient.city}<br>
+                        ${patient.conditions.length > 0 ? patient.conditions.slice(0,2).join(', ') : 'Sin condiciones detectadas'}
+                    </div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <span class="risk-indicator risk-${patient.riskLevel}">
+                            ${patient.riskLevel === 'high' ? 'Alto Riesgo' : patient.riskLevel === 'medium' ? 'Riesgo Moderado' : 'Riesgo Bajo'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectPatient(index) {
+            selectedPatient = SAMPLE_PATIENTS[index];
+            conversationHistory = []; // Reset conversation
+            messageCount = 0; // Reset message count
+            initialMessagesSent = false; // Reset flag
+            document.getElementById('messagesArea').innerHTML = ''; // Clear messages
+            showView('chat');
+            document.getElementById('chatAvatar').textContent = selectedPatient.avatar;
+            document.getElementById('chatTitle').textContent = `Conversación con ${selectedPatient.name}`;
+            startPersonalizedChat();
+        }
+
+        async function startPersonalizedChat() {
+            if (initialMessagesSent) return; // PREVENT INFINITE LOOP
+            initialMessagesSent = true;
+
+            const p = selectedPatient;
+
+            // Mensaje 1: Saludo personalizado
+            await addMessageWithDelay('assistant',
+                `Hola ${p.name}, soy TÚ pero del futuro. Tengo ${p.age + 15} años ahora, y necesito hablar contigo sobre algo MUY importante. ¿Tienes 5 minutos?`
+            , 500);
+
+            // Mensaje 2: Datos específicos
+            await addMessageWithDelay('assistant',
+                `Mira, sé que tienes ${p.age} años y vives en ${p.city}. ${p.conditions.length > 0 ? `Ya tienes ${p.conditions.join(', ')}.` : 'Estás saludable ahora.'} Pero si no actúas AHORA, todo empeora.`
+            , 2500);
+
+            // Mensaje 3: Mostrar gráfico de riesgo cardiovascular
+            await addMessageWithDelay('assistant',
+                `Déjame mostrarte algo que te va a impactar:`
+            , 4500);
+
+            // Agregar gráfico de riesgo cardiovascular
+            setTimeout(() => addHealthChart('cardiovascular'), 6000);
+
+            // Mensaje 4: Explicar filtración glomerular
+            await addMessageWithDelay('assistant',
+                `Tu TFG (filtración glomerular) es ${p.gfr} ml/min/1.73m². ${p.gfr < 60 ? 'Esto indica daño renal temprano. Tus riñones ya no funcionan al 100%.' : p.gfr < 90 ? 'Está en el límite. Podríamos prevenir que empeore.' : 'Está bien, pero podemos mantenerla así.'}`
+            , 8000);
+
+            // Agregar referencia bibliográfica
+            setTimeout(() => {
+                const ref = document.createElement('div');
+                ref.className = 'message';
+                ref.innerHTML = `
+                    <div class="message-bubble">
+                        <div class="reference">
+                            📚 <strong>Referencia:</strong> National Kidney Foundation (2023). "Chronic Kidney Disease: Assessment and Management".
+                            TFG < 60 ml/min indica enfermedad renal crónica estadio 3.
+                            <br><em>DOI: 10.1053/j.ajkd.2023.01.001</em>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('messagesArea').appendChild(ref);
+                scrollToBottom();
+            }, 10000);
+
+            // Mensaje 5: Primera pregunta abierta (AQUÍ SE DETIENE - ahora el usuario DEBE responder)
+            await addMessageWithDelay('assistant',
+                `${p.name}, ¿qué te preocupa más de tu salud en este momento?`
+            , 12000);
+
+            // STOP HERE - Now OpenAI takes over the conversation
+        }
+
+        async function addMessageWithDelay(role, text, delay) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    addMessage(role, text);
+                    resolve();
+                }, delay);
+            });
+        }
+
+        function addMessage(role, text) {
+            const messagesArea = document.getElementById('messagesArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = text;
+
+            messageDiv.appendChild(bubble);
+            messagesArea.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function addHealthChart(type) {
+            const messagesArea = document.getElementById('messagesArea');
+            const chartDiv = document.createElement('div');
+            chartDiv.className = 'chart-container';
+
+            const canvas = document.createElement('canvas');
+            canvas.id = 'healthChart' + Date.now();
+            chartDiv.appendChild(canvas);
+
+            messagesArea.appendChild(chartDiv);
+            scrollToBottom();
+
+            if (type === 'cardiovascular') {
+                new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Tú Ahora', 'En 5 años\n(sin programa)', 'En 5 años\n(con programa)'],
+                        datasets: [{
+                            label: 'Riesgo Cardiovascular (%)',
+                            data: [selectedPatient.cardiovascularRisk, selectedPatient.cardiovascularRisk + 15, selectedPatient.cardiovascularRisk - 10],
+                            backgroundColor: ['#ffc107', '#ff6b6b', '#28a745']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Proyección de Riesgo Cardiovascular a 10 años',
+                                font: { size: 14 }
+                            },
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 60,
+                                title: { display: true, text: 'Riesgo (%)' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function scrollToBottom() {
+            const messagesArea = document.getElementById('messagesArea');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // SEND MESSAGE
+        document.getElementById('sendButton').onclick = sendMessage;
+        document.getElementById('messageInput').onkeypress = function(e) {
+            if (e.key === 'Enter') sendMessage();
+        };
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('user', message);
+            input.value = '';
+            messageCount++; // Increment message counter
+
+            document.getElementById('typingIndicator').classList.add('show');
+
+            try {
+                const response = await callOpenAI(message);
+                document.getElementById('typingIndicator').classList.remove('show');
+                addMessage('assistant', response);
+
+                // Check for acceptance keywords
+                const acceptanceKeywords = ['sí', 'si', 'acepto', 'ok', 'vale', 'claro', 'por supuesto', 'me interesa', 'quiero'];
+                const isAccepting = acceptanceKeywords.some(keyword => message.toLowerCase().includes(keyword));
+
+                // After 3-4 exchanges, offer to show digital twin
+                if (messageCount >= 3 || isAccepting) {
+                    setTimeout(() => {
+                        addMessage('assistant', `${selectedPatient.name}, creo que ya tienes una idea clara de tu situación. ¿Te gustaría ver tu Gemelo Digital completo? Ahí puedes explorar programas de salud personalizados y tu línea de tiempo médica.`);
+                        setTimeout(() => showTransitionButton(), 2000);
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('OpenAI Error:', error);
+                document.getElementById('typingIndicator').classList.remove('show');
+                addMessage('assistant', 'Lo siento, tuve un problema técnico. Pero déjame decirte esto: tu salud es demasiado valiosa para arriesgarla. ¿Podemos continuar?');
+            }
+        }
+
+        async function callOpenAI(userMessage) {
+            const p = selectedPatient;
+
+            // Determine conversation style based on risk level
+            let toneGuidance = '';
+            if (p.riskLevel === 'high') {
+                toneGuidance = 'Sé MUY dramático y urgente. Usa ejemplos de consecuencias graves. Menciona hospitalizaciones, dependencia, impacto familiar.';
+            } else if (p.riskLevel === 'medium') {
+                toneGuidance = 'Sé preventivo pero motivador. Enfatiza que AHORA es el mejor momento para actuar.';
+            } else {
+                toneGuidance = 'Sé positivo pero persuasivo. Habla de mantener la salud a largo plazo.';
+            }
+
+            const systemPrompt = `Eres el "yo del futuro" de ${p.name}, una persona de ${p.age} años que vive en ${p.city}. Tú tienes ${p.age + 15} años en el futuro.
+
+DATOS MÉDICOS ACTUALES DE ${p.name}:
+- Condiciones actuales: ${p.conditions.join(', ') || 'Ninguna condición crónica detectada'}
+- TFG (Tasa de Filtración Glomerular): ${p.gfr} ml/min/1.73m²
+- Riesgo cardiovascular a 10 años: ${p.cardiovascularRisk}%
+- Nivel de riesgo general: ${p.riskLevel === 'high' ? 'ALTO' : p.riskLevel === 'medium' ? 'MODERADO' : 'BAJO'}
+
+INSTRUCCIONES CRÍTICAS:
+1. ${toneGuidance}
+2. Si el usuario tiene OBJECIONES ("no tengo tiempo", "es caro", "no creo", "luego lo veo"), responde con EMPATÍA primero, luego contraargumenta con datos específicos.
+3. Menciona los datos médicos específicos (TFG ${p.gfr}, riesgo ${p.cardiovascularRisk}%) en tus respuestas.
+4. Máximo 2-3 oraciones por respuesta. Sé conciso pero impactante.
+5. Si el usuario pregunta sobre programas, menciona que hay programas personalizados disponibles en ${p.city}.
+6. Habla en primera persona como "yo del futuro" - ejemplo: "En mi época (15 años después), esto se convirtió en..."
+
+MANEJO DE OBJECIONES COMUNES:
+- "No tengo tiempo" → "Yo tampoco tenía tiempo. Y ahora paso 3 días al mes en el hospital."
+- "Es caro" → "Saber cuánto gasté en complicaciones? ${p.cardiovascularRisk * 1000} dólares al año. Prevención cuesta menos."
+- "No estoy seguro/a" → "Yo tampoco estaba seguro. Hasta que fue demasiado tarde."`;
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...conversationHistory,
+                { role: 'user', content: userMessage }
+            ];
+
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4',
+                    messages: messages,
+                    temperature: 0.85,
+                    max_tokens: 120
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) {
+                console.error('OpenAI API Error:', data.error);
+                throw new Error(data.error.message);
+            }
+
+            const reply = data.choices[0].message.content;
+            conversationHistory.push({ role: 'user', content: userMessage });
+            conversationHistory.push({ role: 'assistant', content: reply });
+
+            return reply;
+        }
+
+        function showTransitionButton() {
+            // Check if button already exists to prevent duplicates
+            if (document.querySelector('.transition-button-container')) return;
+
+            const messagesArea = document.getElementById('messagesArea');
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'transition-button-container';
+            buttonDiv.style.textAlign = 'center';
+            buttonDiv.style.padding = '20px';
+            buttonDiv.style.margin = '10px 0';
+            buttonDiv.innerHTML = `
+                <button class="cta-button" onclick="showDigitalTwin()" style="
+                    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-turquoise) 100%);
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    font-size: 1.1em;
+                    font-weight: bold;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+                    transition: all 0.3s ease;
+                ">
+                    🧬 Ver Mi Gemelo Digital Completo
+                </button>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                    Explora tus programas de salud personalizados y tu línea de tiempo médica
+                </p>
+            `;
+            messagesArea.appendChild(buttonDiv);
+            scrollToBottom();
+        }
+
+        function showDigitalTwin() {
+            showView('twin');
+            renderInnovativeTwin();
+        }
+
+        function renderInnovativeTwin() {
+            const p = selectedPatient;
+            const content = document.getElementById('twinContentNew');
+
+            content.innerHTML = `
+                <div class="interactive-twin">
+                    <div class="avatar-section">
+                        <div class="interactive-avatar">
+                            ${p.avatar}
+                            <div class="health-indicator indicator-heart" title="Salud Cardiovascular">❤️</div>
+                            <div class="health-indicator indicator-kidney" title="Función Renal">🔵</div>
+                            <div class="health-indicator indicator-lung" title="Función Respiratoria">🫁</div>
+                        </div>
+                        <h2>${p.name}</h2>
+                        <p>${p.age} años • ${p.city}</p>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-card-new">
+                            <div class="card-title">📊 Métricas Clave de Salud</div>
+                            <div class="metrics-row">
+                                <div class="metric-box">
+                                    <div class="metric-value-large">${p.gfr}</div>
+                                    <div class="metric-label-small">TFG<br>(ml/min)</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-value-large">${p.cardiovascularRisk}%</div>
+                                    <div class="metric-label-small">Riesgo<br>Cardiovascular</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-value-large">${p.conditions.length}</div>
+                                    <div class="metric-label-small">Condiciones<br>Activas</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-card-new">
+                            <div class="card-title">⚠️ Condiciones Detectadas</div>
+                            ${p.conditions.length > 0 ? p.conditions.map(c => `
+                                <div style="padding: 10px; background: #fff3cd; margin: 5px 0; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                    <strong>${c}</strong>
+                                </div>
+                            `).join('') : '<p style="color: #28a745;">✓ Sin condiciones detectadas</p>'}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-container">
+                    <h2 style="color: var(--primary-turquoise); margin-bottom: 20px;">📈 Línea de Tiempo de Salud</h2>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">HOY - ${new Date().toLocaleDateString('es-CO')}</div>
+                                <div class="timeline-title">Estado Actual</div>
+                                <p>TFG: ${p.gfr} ml/min | Riesgo CV: ${p.cardiovascularRisk}%</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">+3 MESES (con programa)</div>
+                                <div class="timeline-title">Mejora Esperada</div>
+                                <p>TFG: ${Math.min(p.gfr + 5, 100)} ml/min | Riesgo CV: ${Math.max(p.cardiovascularRisk - 5, 0)}%</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">+1 AÑO (con programa)</div>
+                                <div class="timeline-title">Objetivo a Largo Plazo</div>
+                                <p>TFG: ${Math.min(p.gfr + 10, 100)} ml/min | Riesgo CV: ${Math.max(p.cardiovascularRisk - 12, 0)}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 40px 0;">
+                    <button class="cta-button" onclick="showView('insurer')">Ver Panel Asegurador</button>
+                    <button class="back-button" onclick="showView('chat')">Volver al Chat</button>
+                </div>
+            `;
+        }
+
+        function saveCadenceConfig() {
+            const config = {
+                whatsapp: document.getElementById('whatsappFreq').value,
+                calls: document.getElementById('callFreq').value,
+                appointments: document.getElementById('apptReminder').value,
+                birthday: document.getElementById('birthdayMsg').value,
+                surveys: document.getElementById('surveyFreq').value,
+                alerts: document.getElementById('highRiskAlerts').value
+            };
+
+            alert(`✅ Configuración Guardada\n\nWhatsApp: ${config.whatsapp}\nLlamadas: ${config.calls}\nRecordatorios: ${config.appointments}\nCumpleaños: ${config.birthday}\n\nEl sistema está configurado para gestionar automáticamente al paciente.`);
+        }
+
+        function downloadData() {
+            const p = selectedPatient;
+            const csv = `Nombre,Edad,Ciudad,Riesgo,TFG,Riesgo CV,Condiciones\n${p.name},${p.age},${p.city},${p.riskLevel},${p.gfr},${p.cardiovascularRisk}%,"${p.conditions.join('; ')}"`;
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `reporte_${p.name.replace(' ', '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            alert('📥 Descargando reporte Excel/CSV');
+        }
+
+        function showView(view) {
+            document.getElementById('patient-selection-view').style.display = 'none';
+            document.getElementById('chat-view').style.display = 'none';
+            document.getElementById('digital-twin-view').style.display = 'none';
+            document.getElementById('insurer-view').style.display = 'none';
+
+            if (view === 'selection') {
+                document.getElementById('patient-selection-view').style.display = 'block';
+            } else if (view === 'chat') {
+                document.getElementById('chat-view').style.display = 'flex';
+            } else if (view === 'twin') {
+                document.getElementById('digital-twin-view').style.display = 'flex';
+            } else if (view === 'insurer') {
+                document.getElementById('insurer-view').style.display = 'flex';
+            }
+        }
+    </script>
+</body>
+</html>
