@@ -35,28 +35,41 @@ app.include_router(analytics.router)
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Serve frontend HTML files
+# Serve frontend HTML files (PRODUCTION-READY)
 @app.get("/")
 def root():
-    """Root endpoint - redirect to chat"""
-    return {"message": "Digital Twin Health MVP API", "docs": "/docs"}
+    """Root endpoint - serve landing page with login"""
+    return FileResponse("frontend/index.html")
 
 
+@app.get("/plataforma-integrada")
+def serve_plataforma_integrada():
+    """Serve complete patient platform (gamification + chat + dashboard)"""
+    return FileResponse("frontend/plataforma_integrada.html")
+
+
+@app.get("/admin-dashboard")
+def serve_admin_dashboard():
+    """Serve admin dashboard (30 patients + KPIs + charts)"""
+    return FileResponse("frontend/admin_dashboard.html")
+
+
+# Legacy endpoints (old backend frontends - may not work)
 @app.get("/chat-ui")
 def serve_chat():
-    """Serve chat frontend"""
+    """Serve chat frontend (legacy)"""
     return FileResponse("frontend/chat.html")
 
 
 @app.get("/patient-dashboard")
 def serve_patient_dashboard():
-    """Serve patient dashboard"""
+    """Serve patient dashboard (legacy)"""
     return FileResponse("frontend/patient_dashboard.html")
 
 
 @app.get("/insurer-platform")
 def serve_insurer_platform():
-    """Serve insurer management platform"""
+    """Serve insurer management platform (legacy)"""
     return FileResponse("frontend/insurer_platform.html")
 
 
