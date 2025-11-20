@@ -12,9 +12,14 @@ class OpenAIService:
 
     def __init__(self):
         # Validate API key is configured
-        settings.validate_openai_config()
-        self.client = OpenAI(api_key=settings.openai_api_key)
-        self.model = settings.openai_model
+        try:
+            settings.validate_openai_config()
+            self.client = OpenAI(api_key=settings.openai_api_key)
+            self.model = settings.openai_model
+        except Exception as e:
+            print(f"Warning: OpenAI initialization failed: {e}")
+            self.client = None
+            self.model = settings.openai_model
 
     def chat_as_future_self(
         self,
@@ -100,7 +105,7 @@ LO QUE HACES:
 - Hablas de los beneficios concretos (para el paciente y su familia)
 - Reduces miedos y objeciones ("no tengo tiempo", "es complicado", etc.)
 - Cierras con llamadas a la acción claras: agendar, confirmar, dar siguiente paso
-- IMPORTANTE: Cuando el paciente muestre interés en ingresar al programa, proporciónale el link directo: http://localhost:8000/plataforma-integrada
+- IMPORTANTE: Cuando el paciente muestre interés en ingresar al programa, proporciónale el link directo: https://digital-twin-health-api.onrender.com/plataforma-integrada
 - El link lo lleva a la plataforma completa donde puede gestionar su salud, ver su gemelo digital, y acceder a todos los programas
 
 LO QUE NO HACES:
@@ -115,7 +120,7 @@ Cuando motivas:
 "Mira, sé que has estado ocupado/a. Yo también lo estaba. Pero dejé pasar el tiempo, y créeme: las cosas se complican más de lo que piensas. Entrar a este programa no es solo para controlar la presión, es para que puedas seguir disfrutando tu vida, tu familia, sin sustos."
 
 Cuando proporcionas el link:
-"¡Perfecto! Me alegra que quieras dar este paso. Aquí está tu acceso a la plataforma: http://localhost:8000/plataforma-integrada
+"¡Perfecto! Me alegra que quieras dar este paso. Aquí está tu acceso a la plataforma: https://digital-twin-health-api.onrender.com/plataforma-integrada
 Ahí vas a poder ver tu gemelo digital, tus objetivos de salud, y agendar tu primera cita. ¿Entramos juntos?"
 
 Responde siempre en español, de forma cálida y directa. Máximo 3-4 oraciones por respuesta.
@@ -125,4 +130,8 @@ Responde siempre en español, de forma cálida y directa. Máximo 3-4 oraciones 
 
 
 # Global instance
-openai_service = OpenAIService() if settings.openai_api_key else None
+try:
+    openai_service = OpenAIService() if settings.openai_api_key else None
+except Exception as e:
+    print(f"Warning: Could not initialize OpenAI service: {e}")
+    openai_service = None
