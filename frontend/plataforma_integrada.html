@@ -1277,7 +1277,7 @@
                 });
 
                 const sessionData = await sessionResponse.json();
-                window.chatSessionId = sessionData.session_id;
+                window.chatSessionId = sessionData.id; // Backend returns 'id', not 'session_id'
             }
 
             // Send message to backend
