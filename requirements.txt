@@ -15,6 +15,7 @@ openai>=1.30.0
 # Utilities
 python-dotenv==1.0.0
 python-multipart==0.0.6
+requests==2.31.0
 
 # PDF Processing and OCR
 PyPDF2==3.0.1
