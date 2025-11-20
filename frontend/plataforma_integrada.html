@@ -1257,43 +1257,45 @@
 
         async function callOpenAI(userMessage) {
             const p = selectedPatient;
-            const toneGuidance = p.cardiovascularRisk >= 30 ? 'Sé MUY dramático y urgente.' : 'Sé preventivo pero motivador.';
 
-            const systemPrompt = `Eres el "yo del futuro" de ${p.name}, de ${p.age} años de ${p.city}.
+            // Determine the API base URL based on environment
+            const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:8000'
+                : 'https://digital-twin-health-api.onrender.com';
 
-DATOS MÉDICOS:
-- Condiciones: ${p.conditions.join(', ') || 'Ninguna'}
-- TFG: ${p.gfr} ml/min/1.73m²
-- Riesgo cardiovascular: ${p.cardiovascularRisk}%
+            // Create or get chat session
+            if (!window.chatSessionId) {
+                // Create new chat session
+                const sessionResponse = await fetch(`${API_BASE_URL}/chat/session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        patient_id: 1 // Using patient 1 as default
+                    })
+                });
 
-${toneGuidance}
-Maneja objeciones con empatía y datos.
-Máximo 2-3 oraciones.`;
+                const sessionData = await sessionResponse.json();
+                window.chatSessionId = sessionData.session_id;
+            }
 
-            const messages = [
-                { role: 'system', content: systemPrompt },
-                ...conversationHistory,
-                { role: 'user', content: userMessage }
-            ];
-
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            // Send message to backend
+            const response = await fetch(`${API_BASE_URL}/chat/message`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'gpt-4',
-                    messages: messages,
-                    temperature: 0.85,
-                    max_tokens: 120
+                    session_id: window.chatSessionId,
+                    message: userMessage
                 })
             });
 
             const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
+            if (!response.ok) throw new Error(data.detail || 'Error al enviar mensaje');
 
-            const reply = data.choices[0].message.content;
+            const reply = data.assistant_message;
             conversationHistory.push({ role: 'user', content: userMessage });
             conversationHistory.push({ role: 'assistant', content: reply });
 
