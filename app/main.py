@@ -71,6 +71,46 @@ def health_check():
     }
 
 
+@app.get("/setup-database")
+def setup_database():
+    """
+    ONE-TIME endpoint to initialize database with synthetic data.
+    Visit this URL once to setup the database, then it can be removed.
+    """
+    try:
+        import subprocess
+
+        # Run init_db.py
+        result_init = subprocess.run(
+            ["python", "db/init_db.py"],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        # Run seed_synthetic_data.py
+        result_seed = subprocess.run(
+            ["python", "db/seed_synthetic_data.py"],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+
+        return {
+            "status": "success",
+            "message": "Database initialized successfully",
+            "init_output": result_init.stdout,
+            "seed_output": result_seed.stdout,
+            "note": "You can now remove this endpoint for security"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "note": "If this fails, use Render Shell to run: python db/init_db.py && python db/seed_synthetic_data.py"
+        }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
