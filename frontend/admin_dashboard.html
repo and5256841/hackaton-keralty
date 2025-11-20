@@ -378,6 +378,242 @@
         .export-button:hover {
             background: #059669;
         }
+
+        /* OCR BUTTON */
+        .ocr-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .ocr-button:hover {
+            background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-body {
+            padding: 32px;
+        }
+
+        .close-button {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            line-height: 1;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .close-button:hover {
+            opacity: 1;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-blue);
+            background: var(--bg-light);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-blue);
+            background: #EEF2FF;
+        }
+
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            margin-top: 16px;
+            padding: 12px 32px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .upload-button:hover {
+            background: #1E40AF;
+        }
+
+        .upload-button:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .file-selected {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .progress-container {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8B5CF6, #7C3AED);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .result-preview {
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            display: none;
+        }
+
+        .result-preview h4 {
+            margin: 0 0 16px 0;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-data {
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .result-data strong {
+            color: var(--text-dark);
+        }
+
+        .hipaa-notice {
+            margin-top: 16px;
+            padding: 12px;
+            background: #FEF3C7;
+            border-left: 4px solid #F59E0B;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #92400E;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #DCFCE7;
+            color: #166534;
+            border: 1px solid #10B981;
+        }
+
+        .alert.error {
+            background: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #EF4444;
+        }
     </style>
 </head>
 <body>
@@ -390,6 +626,14 @@
 
     <!-- MAIN CONTAINER -->
     <div class="container">
+
+        <!-- OCR BUTTON -->
+        <div style="margin-bottom: 32px; display: flex; justify-content: center;">
+            <button class="ocr-button" onclick="openOCRModal()">
+                <span style="font-size: 24px;">📄</span>
+                <span>OCR Historia Clínica</span>
+            </button>
+        </div>
 
         <!-- KPI CARDS -->
         <div class="kpi-grid">
@@ -570,6 +814,71 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- OCR MODAL -->
+    <div id="ocrModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-button" onclick="closeOCRModal()">&times;</span>
+                <h2>
+                    <span>📄</span>
+                    <span>OCR Historia Clínica</span>
+                </h2>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--text-light); margin-bottom: 24px;">
+                    Sube un PDF de historia clínica no estructurada. El sistema extraerá automáticamente
+                    los datos del paciente usando IA y creará un nuevo registro en la base de datos.
+                </p>
+
+                <!-- Upload Area -->
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('pdfFileInput').click()">
+                    <div class="upload-icon">📤</div>
+                    <h3 style="margin-bottom: 8px;">Arrastra un PDF aquí o haz clic para seleccionar</h3>
+                    <p style="color: var(--text-light); font-size: 14px;">Solo archivos PDF (máx. 10 MB)</p>
+                </div>
+
+                <input type="file" id="pdfFileInput" class="file-input" accept=".pdf" onchange="handleFileSelect(event)">
+
+                <!-- File Selected Info -->
+                <div class="file-selected" id="fileSelected">
+                    <strong>Archivo seleccionado:</strong> <span id="fileName"></span>
+                    <br>
+                    <strong>Tamaño:</strong> <span id="fileSize"></span>
+                </div>
+
+                <!-- Upload Button -->
+                <button class="upload-button" id="uploadButton" onclick="uploadHistoriaClinica()" disabled>
+                    Procesar Historia Clínica
+                </button>
+
+                <!-- Progress Bar -->
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Procesando PDF...</div>
+                </div>
+
+                <!-- Alerts -->
+                <div class="alert success" id="successAlert"></div>
+                <div class="alert error" id="errorAlert"></div>
+
+                <!-- Result Preview -->
+                <div class="result-preview" id="resultPreview">
+                    <h4>
+                        <span>✅</span>
+                        <span>Paciente Creado Exitosamente</span>
+                    </h4>
+                    <div class="result-data" id="resultData"></div>
+                    <div class="hipaa-notice">
+                        ⚠️ <strong>Nota HIPAA:</strong> El PDF ha sido procesado en memoria y descartado.
+                        Solo los datos estructurados han sido almacenados en la base de datos.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -937,7 +1246,235 @@
 
             // Real-time search
             document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+            // Drag and drop support
+            const uploadArea = document.getElementById('uploadArea');
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type === 'application/pdf') {
+                    handleFile(files[0]);
+                } else {
+                    showError('Por favor, sube un archivo PDF válido.');
+                }
+            });
         });
+
+        // ========================================
+        // OCR MODAL FUNCTIONS
+        // ========================================
+        let selectedFile = null;
+
+        function openOCRModal() {
+            document.getElementById('ocrModal').style.display = 'block';
+            resetModal();
+        }
+
+        function closeOCRModal() {
+            document.getElementById('ocrModal').style.display = 'none';
+            resetModal();
+        }
+
+        function resetModal() {
+            selectedFile = null;
+            document.getElementById('pdfFileInput').value = '';
+            document.getElementById('fileSelected').style.display = 'none';
+            document.getElementById('uploadButton').disabled = true;
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('resultPreview').style.display = 'none';
+            document.getElementById('successAlert').style.display = 'none';
+            document.getElementById('errorAlert').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            // Validate file type
+            if (file.type !== 'application/pdf') {
+                showError('Solo se permiten archivos PDF.');
+                return;
+            }
+
+            // Validate file size (10 MB max)
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showError('El archivo es demasiado grande. Máximo 10 MB.');
+                return;
+            }
+
+            selectedFile = file;
+
+            // Show file info
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileSelected').style.display = 'block';
+            document.getElementById('uploadButton').disabled = false;
+
+            // Hide previous results
+            document.getElementById('resultPreview').style.display = 'none';
+            document.getElementById('successAlert').style.display = 'none';
+            document.getElementById('errorAlert').style.display = 'none';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        async function uploadHistoriaClinica() {
+            if (!selectedFile) {
+                showError('Por favor, selecciona un archivo PDF.');
+                return;
+            }
+
+            // Disable upload button
+            const uploadButton = document.getElementById('uploadButton');
+            uploadButton.disabled = true;
+            uploadButton.textContent = 'Procesando...';
+
+            // Show progress
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('progressFill').style.width = '30%';
+            document.getElementById('progressText').textContent = 'Extrayendo texto del PDF...';
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                // Determine API URL
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const API_BASE = isLocalhost ? 'http://localhost:8000' : '';
+
+                // Update progress
+                document.getElementById('progressFill').style.width = '50%';
+                document.getElementById('progressText').textContent = 'Estructurando datos con IA...';
+
+                // Upload file
+                const response = await fetch(`${API_BASE}/admin/upload-historia-clinica`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Update progress
+                document.getElementById('progressFill').style.width = '80%';
+                document.getElementById('progressText').textContent = 'Creando paciente en base de datos...';
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.detail || 'Error al procesar la historia clínica');
+                }
+
+                // Complete progress
+                document.getElementById('progressFill').style.width = '100%';
+                document.getElementById('progressText').textContent = '¡Completado!';
+
+                // Show success
+                setTimeout(() => {
+                    showSuccess(result);
+                }, 500);
+
+            } catch (error) {
+                console.error('Error uploading historia clínica:', error);
+                showError(error.message || 'Error al procesar la historia clínica. Por favor, intenta nuevamente.');
+
+                // Reset button
+                uploadButton.disabled = false;
+                uploadButton.textContent = 'Procesar Historia Clínica';
+
+                // Hide progress
+                document.getElementById('progressContainer').style.display = 'none';
+            }
+        }
+
+        function showSuccess(result) {
+            // Hide progress
+            document.getElementById('progressContainer').style.display = 'none';
+
+            // Show success alert
+            const successAlert = document.getElementById('successAlert');
+            successAlert.textContent = `✅ ${result.message} - ${result.patient_name}`;
+            successAlert.style.display = 'block';
+
+            // Show result preview
+            const resultData = document.getElementById('resultData');
+            resultData.innerHTML = `
+                <strong>ID del Paciente:</strong> ${result.patient_id}<br>
+                <strong>Nombre:</strong> ${result.patient_name}<br>
+                <strong>Datos Extraídos:</strong><br>
+                <div style="margin-left: 20px; margin-top: 8px;">
+                    ${formatExtractedData(result.extracted_data)}
+                </div>
+                <br>
+                <strong>Próximos pasos:</strong> ${result.next_steps}
+            `;
+            document.getElementById('resultPreview').style.display = 'block';
+
+            // Reset button
+            const uploadButton = document.getElementById('uploadButton');
+            uploadButton.disabled = false;
+            uploadButton.textContent = 'Procesar Historia Clínica';
+
+            // Refresh page data after 2 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        }
+
+        function formatExtractedData(data) {
+            let html = '';
+
+            if (data.gender) html += `• Género: ${data.gender}<br>`;
+            if (data.city) html += `• Ciudad: ${data.city}<br>`;
+            if (data.risk_level) html += `• Nivel de Riesgo: ${data.risk_level}<br>`;
+            if (data.conditions && data.conditions.length > 0) {
+                html += `• Condiciones: ${data.conditions.join(', ')}<br>`;
+            }
+            if (data.recommended_programs && data.recommended_programs.length > 0) {
+                html += `• Programas Recomendados: ${data.recommended_programs.join(', ')}<br>`;
+            }
+
+            return html || 'Datos estructurados guardados en base de datos';
+        }
+
+        function showError(message) {
+            const errorAlert = document.getElementById('errorAlert');
+            errorAlert.textContent = `❌ ${message}`;
+            errorAlert.style.display = 'block';
+
+            // Hide progress
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('ocrModal');
+            if (event.target === modal) {
+                closeOCRModal();
+            }
+        }
     </script>
 
 </body>

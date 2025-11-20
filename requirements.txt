@@ -16,5 +16,9 @@ openai>=1.30.0
 python-dotenv==1.0.0
 python-multipart==0.0.6
 
+# PDF Processing and OCR
+PyPDF2==3.0.1
+python-magic-bin==0.4.14
+
 # Data Generation (for synthetic patients)
 faker==22.6.0

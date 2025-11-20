@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 import os
 
 from app.config import settings
-from app.routers import chat, patients, analytics
+from app.routers import chat, patients, analytics, admin
 
 # Create FastAPI app
 app = FastAPI(
@@ -30,6 +30,7 @@ app.add_middleware(
 app.include_router(chat.router)
 app.include_router(patients.router)
 app.include_router(analytics.router)
+app.include_router(admin.router)
 
 # Serve static files (CSS, JS, images)
 if os.path.exists("static"):
